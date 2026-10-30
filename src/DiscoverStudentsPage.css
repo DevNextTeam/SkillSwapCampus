@@ -1,0 +1,299 @@
+
+.discover-page {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.discover-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.discover-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #7560d8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.discover-heading h2 {
+  margin: 0 0 8px;
+  color: #20243a;
+  font-size: 25px;
+}
+
+.discover-heading p,
+.discover-results-heading p {
+  margin: 0;
+  color: #85899b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.discover-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border: 1px solid #e7e5f1;
+  border-radius: 10px;
+  background: white;
+  color: #5145a5;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.discover-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.discover-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.discover-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  min-height: 50px;
+  background: white;
+  border: 1px solid #e9e8f0;
+  border-radius: 12px;
+  color: #9295a5;
+}
+
+.discover-search input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #292d40;
+  font: inherit;
+  font-size: 14px;
+}
+
+.discover-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.discover-filters button {
+  padding: 9px 15px;
+  border: 1px solid #e8e6f0;
+  border-radius: 20px;
+  background: white;
+  color: #777b8e;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.discover-filters button.active {
+  background: #6554c8;
+  border-color: #6554c8;
+  color: white;
+}
+
+.discover-results-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #7666cf;
+}
+
+.discover-results-heading h3 {
+  margin: 0 0 5px;
+  color: #252940;
+  font-size: 18px;
+}
+
+.discover-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.student-card {
+  min-width: 0;
+  padding: 22px;
+  background: white;
+  border: 1px solid #eceaf3;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(36, 31, 75, 0.035);
+}
+
+.student-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 17px;
+}
+
+.student-avatar {
+  display: grid;
+  place-items: center;
+  width: 53px;
+  height: 53px;
+  border-radius: 15px;
+  background: #eeeaff;
+  color: #6554c8;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.student-member-label {
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f0f8f4;
+  color: #478767;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.student-card-info h3 {
+  margin: 0 0 9px;
+  color: #262a40;
+  font-size: 18px;
+}
+
+.student-university {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 5px;
+  color: #7164bd;
+  font-size: 13px;
+}
+
+.student-course {
+  margin: 0 0 12px;
+  color: #85899b;
+  font-size: 12px;
+}
+
+.student-bio {
+  margin: 12px 0 19px;
+  color: #777b8d;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.student-skills-group {
+  margin-top: 16px;
+}
+
+.student-skills-group h4 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  color: #4e438e;
+  font-size: 12px;
+}
+
+.student-skills-group.wanted h4 {
+  color: #a16b39;
+}
+
+.student-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.student-skill-tags span {
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #f1efff;
+  color: #6254b4;
+  font-size: 11px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.student-skills-group.wanted .student-skill-tags span {
+  background: #fff4e8;
+  color: #a16b39;
+}
+
+.student-skill-tags small {
+  color: #999bad;
+  font-size: 12px;
+}
+
+.discover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 25px;
+  border: 1px dashed #dcd9eb;
+  border-radius: 15px;
+  background: white;
+  color: #7565c7;
+  text-align: center;
+}
+
+.discover-empty h3 {
+  margin: 13px 0 5px;
+  color: #292d42;
+}
+
+.discover-empty p {
+  margin: 0;
+  color: #85899b;
+  font-size: 13px;
+}
+
+.discover-error button {
+  margin-top: 15px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #6554c8;
+  color: white;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .discover-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .discover-heading {
+    align-items: flex-start;
+  }
+
+  .discover-heading h2 {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 480px) {
+  .discover-heading {
+    flex-direction: column;
+  }
+
+  .discover-refresh {
+    align-self: flex-start;
+  }
+
+  .student-card {
+    padding: 17px;
+  }
+}
