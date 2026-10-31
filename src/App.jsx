@@ -221,6 +221,48 @@ function App() {
     return () => window.clearInterval(timer);
   }, [user?.id]);
 
+  // Play a soft original two-note loading chime when browser audio is permitted.
+  useEffect(() => {
+    if (!authLoading) return undefined;
+    let played = false;
+    const playChime = async () => {
+      if (played) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      try {
+        const context = new AudioContextClass();
+        await context.resume();
+        const start = context.currentTime + 0.04;
+        [523.25, 659.25].forEach((frequency, index) => {
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          const at = start + index * 0.16;
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(frequency, at);
+          gain.gain.setValueAtTime(0.0001, at);
+          gain.gain.exponentialRampToValueAtTime(0.035, at + 0.025);
+          gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.24);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(at);
+          oscillator.stop(at + 0.25);
+        });
+        played = true;
+        window.setTimeout(() => context.close().catch(() => {}), 700);
+      } catch {
+        // Browsers may block audio until a visitor interacts with the page.
+      }
+    };
+    const onInteraction = () => { playChime(); };
+    if (navigator.userActivation?.hasBeenActive) playChime();
+    window.addEventListener("pointerdown", onInteraction, { once: true });
+    window.addEventListener("keydown", onInteraction, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", onInteraction);
+      window.removeEventListener("keydown", onInteraction);
+    };
+  }, [authLoading]);
+
   // Restore an existing login session instead of logging students out on refresh.
   useEffect(() => {
     let isMounted = true;
