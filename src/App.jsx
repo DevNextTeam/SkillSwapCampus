@@ -235,7 +235,7 @@ function App() {
         restoredUser = null;
       } finally {
         // Keep the branded splash visible briefly so startup never flashes past unnoticed.
-        const remaining = Math.max(0, 550 - (Date.now() - startedAt));
+        const remaining = Math.max(0, 1800 - (Date.now() - startedAt));
         if (remaining) {
           await new Promise((resolve) => window.setTimeout(resolve, remaining));
         }
@@ -309,16 +309,12 @@ function App() {
             className="splash-logo"
           />
 
-          <h1>SkillSwap Campus</h1>
-          <p>Learn together. Grow together.</p>
           <div className="splash-loader" role="status" aria-label="Loading your campus community">
             <span />
             <span />
             <span />
           </div>
-          <small>Getting your campus community ready…</small>
         </div>
-        <div className="splash-footer">PEER-TO-PEER LEARNING</div>
       </div>
     );
   }
