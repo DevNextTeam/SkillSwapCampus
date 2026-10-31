@@ -30,13 +30,14 @@ export default function DiscoverStudentsPage({ currentUserId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
+  const [showProfilePage, setShowProfilePage] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [notice, setNotice] = useState("");
   const [messageText, setMessageText] = useState("");
   const [conversation, setConversation] = useState([]);
 
   async function openStudent(student) {
-    setSelected(student); setDetailLoading(true); setNotice(""); setConversation([]);
+    setSelected(student); setShowProfilePage(false); setDetailLoading(true); setNotice(""); setConversation([]);
     try { const result = await apiRequest(`get_student_profile.php?id=${student.id}`); setSelected(result.student); }
     catch (err) { setNotice(err.message || "Unable to load profile."); }
     finally { setDetailLoading(false); }
@@ -111,6 +112,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
 
   return (
     <div className="discover-page">
+      {!showProfilePage && <>
       <div className="discover-heading">
         <div>
           <div className="discover-eyebrow">
@@ -276,7 +278,32 @@ export default function DiscoverStudentsPage({ currentUserId }) {
           ))}
         </div>
       )}
-      {selected && (
+      </>}
+      {selected && !showProfilePage && (
+        <div className="student-quick-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) { setSelected(null); setConversation([]); } }}>
+          <section className="student-quick-panel" role="dialog" aria-modal="true" aria-label={`Connect with ${selected.full_name}`}>
+            <button className="student-quick-close" type="button" onClick={() => { setSelected(null); setConversation([]); }}>×</button>
+            {detailLoading ? <div className="student-profile-loading">Loading student profile...</div> : <>
+              <div className="student-quick-person">
+                <div className="student-avatar student-profile-avatar">{selected.profile_photo ? <img src={`${API_BASE}/${selected.profile_photo}`} alt={selected.full_name} /> : getInitials(selected.full_name)}</div>
+                <div><span className="profile-member-pill">CAMPUS MEMBER</span><h2>{selected.full_name}</h2><p>{[selected.university, selected.course, selected.year_level].filter(Boolean).join(" · ") || "Student member"}</p></div>
+              </div>
+              <div className="student-quick-actions">
+                {!selected.friend_status || selected.friend_status.status === "declined" ? <button type="button" onClick={() => friendAction("send")}>Add friend</button> : selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? <span className="student-request-status">Request sent · Pending</span> : selected.friend_status.status === "pending" ? <button type="button" onClick={() => friendAction("accept")}>Accept request</button> : <span className="student-request-status">Friends</span>}
+                <button type="button" className="secondary" disabled={selected.friend_status?.status !== "accepted"} onClick={loadConversation}>Send message</button>
+                <button type="button" className="tertiary" onClick={() => setShowProfilePage(true)}>View profile</button>
+              </div>
+              {notice && <p className="student-profile-notice">{notice}</p>}
+              {selected.friend_status?.status === "accepted" && <div className="student-chat">
+                <div className="student-chat-title">PRIVATE MESSAGES</div>
+                <div className="student-chat-history">{conversation.length ? conversation.map(item => <p className={Number(item.sender_id) === Number(currentUserId) ? "sent" : "received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>) : <p className="student-chat-empty">Your conversation with {selected.full_name} will appear here.</p>}</div>
+                <form onSubmit={sendMessage}><input value={messageText} onChange={event => setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000} /><button type="submit">Send</button></form>
+              </div>}
+            </>}
+          </section>
+        </div>
+      )}
+      {selected && showProfilePage && (
         <section className="student-profile-page">
           <button className="student-profile-back" type="button" onClick={() => { setSelected(null); setConversation([]); setNotice(""); }}>
             <span aria-hidden="true">←</span> Back to students
