@@ -233,9 +233,9 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                   </p>
                 )}
 
-                <p className="student-bio">
-                  {student.bio && <>{student.bio}</>}
-                </p>
+                {student.bio?.trim() && (
+                  <p className="student-bio">{student.bio}</p>
+                )}
 
                 <div className="student-skills-group">
                   <h4>
