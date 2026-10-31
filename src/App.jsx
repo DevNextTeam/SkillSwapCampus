@@ -507,7 +507,7 @@ function App() {
 
           {/* DISCOVER STUDENTS PAGE */}
           {activePage === "Discover Students" ? (
-            <DiscoverStudentsPage />
+            <DiscoverStudentsPage currentUserId={user.id} />
 
           ) : activePage === "My Profile" ? (
             <ProfilePage
