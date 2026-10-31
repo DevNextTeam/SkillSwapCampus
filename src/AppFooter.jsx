@@ -1,4 +1,4 @@
-import { ArrowUpRight, Facebook, Instagram, Linkedin, Github, Mail } from "lucide-react";
+import { ArrowUpRight, Users, Camera, BriefcaseBusiness, Code, Mail } from "lucide-react";
 import "./AppFooter.css";
 
 const groups = [
@@ -25,10 +25,10 @@ export default function AppFooter({ onNavigate }) {
             : <a key={link.label} href={emailLink(link.mail)}>{link.label}<ArrowUpRight size={13}/></a>)}
         </nav>)}
         <section className="site-footer-social"><h3>Connect</h3><p>Follow the tools and ideas behind our campus community.</p><div>
-          <a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook/></a>
-          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram/></a>
-          <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin/></a>
-          <a href="https://github.com/DevNextTeam/SkillSwapCampus" target="_blank" rel="noreferrer" aria-label="GitHub"><Github/></a>
+          <a href="https://www.facebook.com/" target="_blank" rel="noreferrer" aria-label="Facebook"><Users/></a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram"><Camera/></a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><BriefcaseBusiness/></a>
+          <a href="https://github.com/DevNextTeam/SkillSwapCampus" target="_blank" rel="noreferrer" aria-label="GitHub"><Code/></a>
         </div></section>
       </div>
       <div className="site-footer-bottom"><span>© 2026 SkillSwap Campus. All rights reserved.</span><div><a href={emailLink("Privacy Policy")}>Privacy Policy</a><a href={emailLink("Terms of Service")}>Terms of Service</a></div></div>
