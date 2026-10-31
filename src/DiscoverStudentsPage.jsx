@@ -232,7 +232,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                 )}
 
                 <p className="student-bio">
-                  {student.bio || "This student hasn't added a bio yet."}
+                  {student.bio && <>{student.bio}</>}
                 </p>
 
                 <div className="student-skills-group">
