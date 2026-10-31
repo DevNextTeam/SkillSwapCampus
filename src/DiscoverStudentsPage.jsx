@@ -305,7 +305,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
       )}
       {selected && showProfilePage && (
         <section className="student-profile-page">
-          <button className="student-profile-back" type="button" onClick={() => { setSelected(null); setConversation([]); setNotice(""); }}>
+          <button className="student-profile-back" type="button" onClick={() => { setSelected(null); setShowProfilePage(false); setConversation([]); setNotice(""); }}>
             <span aria-hidden="true">←</span> Back to students
           </button>
           {detailLoading ? (
@@ -340,21 +340,21 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                   </div>
                 </div>
                 {selected.bio?.trim() && <div className="student-profile-about"><h3>About</h3><p>{selected.bio}</p></div>}
-                {notice && <p className="student-profile-notice">{notice}</p>}
-                {selected.friend_status?.status === "accepted" && (
-                  <div className="student-chat">
-                    <div className="student-chat-title">PRIVATE MESSAGES</div>
-                    <div className="student-chat-history">
-                      {conversation.length ? conversation.map(item => (
-                        <p className={Number(item.sender_id) === Number(currentUserId) ? "sent" : "received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>
-                      )) : <p className="student-chat-empty">Your conversation with {selected.full_name} will appear here.</p>}
+                {selected.skills?.length > 0 && (
+                  <section className="student-profile-skills-section">
+                    <h3>Skills</h3>
+                    <div className="student-profile-skills-list">
+                      {selected.skills.map((skill) => (
+                        <article className="student-profile-skill" key={skill.id}>
+                          <div><span className={skill.skill_type === "offer" ? "skill-type-offer" : "skill-type-learn"}>{skill.skill_type === "offer" ? "Offers" : "Wants to learn"}</span><h4>{skill.skill_name}</h4></div>
+                          {skill.category && <span className="student-profile-skill-category">{skill.category}</span>}
+                          {skill.description?.trim() && <p>{skill.description}</p>}
+                        </article>
+                      ))}
                     </div>
-                    <form onSubmit={sendMessage}>
-                      <input value={messageText} onChange={event => setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000} />
-                      <button type="submit">Send</button>
-                    </form>
-                  </div>
+                  </section>
                 )}
+                {notice && <p className="student-profile-notice">{notice}</p>}
               </div>
             </article>
           )}
