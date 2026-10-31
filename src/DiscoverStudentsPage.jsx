@@ -287,7 +287,6 @@ export default function DiscoverStudentsPage({ currentUserId }) {
             <div className="student-profile-header"><div className="student-avatar student-profile-avatar">{selected.profile_photo ? <img src={`${API_BASE}/${selected.profile_photo}`} alt="" /> : getInitials(selected.full_name)}</div><div className="student-profile-identity"><span className="profile-member-pill">CAMPUS MEMBER</span><h2>{selected.full_name}</h2><p>{[selected.university,selected.course,selected.year_level].filter(Boolean).join(" · ")}</p></div></div>
             {selected.bio && <p className="student-profile-bio">{selected.bio}</p>}
             <div className="student-profile-actions">
-              <button type="button" className="profile-view-button" onClick={() => { setConversation([]); setNotice("You're viewing this student's public profile."); }}>View profile</button>
               {!selected.friend_status ? <button type="button" onClick={() => friendAction("send")}>Add friend</button> :
                 selected.friend_status.status === "accepted" ? <button type="button" onClick={loadConversation}>Send message</button> :
                 selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? <span>Request sent · Pending</span> :
