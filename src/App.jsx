@@ -55,6 +55,7 @@ function ProfilePage({ user, onProfileUpdated }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -98,20 +99,20 @@ function ProfilePage({ user, onProfileUpdated }) {
     }
   }
 
-  const initials = form.full_name.trim().split(/\\s+/).filter(Boolean)
+  async function handlePhotoChange(event) {\n    const photo = event.target.files?.[0];\n    if (!photo) return;\n    if (photo.size > 3 * 1024 * 1024) { setMessage("Photo must be 3 MB or smaller."); setMessageType("error"); return; }\n    const body = new FormData(); body.append("photo", photo); setPhotoUploading(true);\n    try { const result = await apiRequest("upload_profile_photo.php", { method: "POST", body }); onProfileUpdated(result.user); setMessage("Profile photo updated."); setMessageType("success"); }\n    catch (error) { setMessage(error.message || "Unable to upload photo."); setMessageType("error"); }\n    finally { setPhotoUploading(false); event.target.value = ""; }\n  }\n\n  const initials = form.full_name.trim().split(/\\s+/).filter(Boolean)
     .map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST";
 
   return (
     <div className="profile-page">
       <form className="profile-intro profile-modern-card" onSubmit={handleSubmit}>
-        <div className="profile-large-avatar">{initials}</div>
+        <div className="profile-photo-wrap">{user.profile_photo ? <img className="profile-large-avatar profile-photo-image" src={`http://10.0.9.203/skillswap-campus/backend/${user.profile_photo}`} alt={`${form.full_name} profile`} /> : <div className="profile-large-avatar">{initials}</div>}{editing && <label className="profile-photo-upload">{photoUploading ? "Uploading..." : "Change photo"}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} disabled={photoUploading} /></label>}</div>
         <div className="profile-identity">
           <h2 title={form.full_name}>{form.full_name || "Your Name"}</h2>
           {editing ? (
             <textarea className="profile-bio-editor" name="bio" value={form.bio}
               onChange={handleChange} placeholder="Write a short bio..." maxLength={500} rows={2} />
           ) : (
-            <p className="profile-bio">{form.bio || "Add a short bio to introduce yourself to the campus community."}</p>
+            <p className="profile-bio">{form.bio}</p>
           )}
           <div className="profile-meta">
             {form.university && <span>{form.university}</span>}
@@ -633,14 +634,6 @@ function App() {
                 )}
               </section>
 
-              {/* FOOTER */}
-              <footer className="footer">
-                <div className="footer-brand">
-                  <strong>SkillSwap Campus</strong>
-                  <span>Learn together. Grow together.</span>
-                </div>
-                <span className="footer-copy">A campus community built on sharing knowledge.</span>
-              </footer>
             </>
 
           ) : (
