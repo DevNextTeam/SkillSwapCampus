@@ -2860,3 +2860,5 @@ body { background: var(--background); color: var(--text); }
  .profile-form-actions button,.profile-edit-button { min-height:42px; }
  .profile-edit-fields { gap:13px; }
 }
+
+.splash-audio-hint { margin-top:14px; color:#e5e0ff; font-size:11px; letter-spacing:.2px; opacity:.85; }
