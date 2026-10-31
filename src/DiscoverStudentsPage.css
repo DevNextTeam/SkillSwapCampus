@@ -377,3 +377,8 @@
 .student-chat form { display:flex; gap:8px; margin-top:12px; }
 .student-chat input { flex:1; min-width:0; border:1px solid #dce3ed; border-radius:9px; padding:11px; }
 @media(max-width:520px) { .student-profile-modal { padding:22px 16px; } .student-profile-header h2 { font-size:19px; } }
+
+
+.student-avatar img { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+.student-profile-avatar { overflow:hidden; border-radius:50%; }
+.student-profile-avatar img { width:100%; height:100%; object-fit:cover; }
