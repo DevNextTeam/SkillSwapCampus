@@ -39,7 +39,7 @@ if ($email === "" || $password === "") {
 try {
     $stmt = $pdo->prepare(
         "SELECT id, full_name, email, password_hash,
-                university, course, year_level
+                university, course, year_level, bio, profile_photo
          FROM users
          WHERE email = ?
          LIMIT 1"
