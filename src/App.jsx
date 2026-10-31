@@ -124,7 +124,7 @@ function ProfilePage({ user, onProfileUpdated }) {
             <textarea className="profile-bio-editor" name="bio" value={form.bio}
               onChange={handleChange} placeholder="Write a short bio..." maxLength={500} rows={2} />
           ) : (
-            <p className="profile-bio">{form.bio}</p>
+            form.bio?.trim() ? <p className="profile-bio">{form.bio}</p> : null
           )}
           <div className="profile-meta">
             {form.university && <span>{form.university}</span>}
