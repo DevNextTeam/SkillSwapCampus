@@ -12,6 +12,8 @@ try {
  foreach ($friends as &$friend) {
    $last=$pdo->prepare("SELECT id,sender_id,body,created_at,read_at FROM messages WHERE (sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?) ORDER BY id DESC LIMIT 1");
    $last->execute([$me,$friend["user_id"],$friend["user_id"],$me]); $friend["last_message"]=$last->fetch(PDO::FETCH_ASSOC) ?: null;
+   $unread=$pdo->prepare("SELECT COUNT(*) FROM messages WHERE sender_id=? AND receiver_id=? AND read_at IS NULL");
+   $unread->execute([$friend["user_id"],$me]); $friend["unread_count"]=(int)$unread->fetchColumn();
  }
  unset($friend);
  echo json_encode(["success"=>true,"incoming_requests"=>$incoming,"friends"=>$friends]);
