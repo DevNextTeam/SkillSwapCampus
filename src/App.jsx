@@ -18,6 +18,7 @@ import {
   X,
   LogOut,
   Save,
+  Pencil,
 } from "lucide-react";
 
 import Auth from "./Auth";
@@ -30,7 +31,7 @@ import "./App.css";
 
 const SPLASH_DURATION = 5000;
 
-// Temporary dashboard recommendations.
+// Temporary dashboard recommendations removed; dashboard uses live skill posts.
 const skills = [
   {
     title: "Web Development",
@@ -473,8 +474,6 @@ function App() {
           </button>
         </div>
 
-        <div className="sidebar-label">WORKSPACE</div>
-
         <nav className="navigation">
           {navigation.map(({ label, icon: Icon }) => (
             <button
@@ -564,7 +563,7 @@ function App() {
           </button>
 
           <div className="breadcrumb">
-            Workspace <span>/</span> <strong>{activePage}</strong>
+            <strong>{activePage}</strong>
           </div>
 
           <div className="topbar-actions">
@@ -577,17 +576,14 @@ function App() {
               <span />
             </button>
 
-            <div className="avatar avatar-green">
-              {userInitials}
-            </div>
-
             <button
-              className="topbar-logout"
-              onClick={handleLogout}
-              title="Log out"
+              type="button"
+              className="avatar avatar-green profile-avatar-button"
+              onClick={() => setActivePage("My Profile")}
+              aria-label="Open my profile"
+              title="My Profile"
             >
-              <LogOut size={17} />
-              <span>Log Out</span>
+              {userInitials}
             </button>
           </div>
         </header>
@@ -614,13 +610,12 @@ function App() {
               </p>
             </div>
 
-            <button
-              className="primary-button"
-              onClick={openSkillForm}
-            >
-              <Plus size={18} />
-              Share a skill
-            </button>
+            {activePage === "Explore Skills" && (
+              <button className="primary-button" onClick={openSkillForm}>
+                <Plus size={18} />
+                Share a skill
+              </button>
+            )}
           </div>
 
           {/* DISCOVER STUDENTS PAGE */}
@@ -846,8 +841,11 @@ function App() {
 
               {/* FOOTER */}
               <footer className="footer">
-                <span>SkillSwap Campus</span>
-                <span>Built for students, powered by sharing.</span>
+                <div className="footer-brand">
+                  <strong>SkillSwap Campus</strong>
+                  <span>Learn together. Grow together.</span>
+                </div>
+                <span className="footer-copy">A campus community built on sharing knowledge.</span>
               </footer>
             </>
 
