@@ -222,47 +222,51 @@ function App() {
     return () => window.clearInterval(timer);
   }, [user?.id]);
 
-  // Play a soft original two-note loading chime when browser audio is permitted.
+  // Play a short, soft loading melody for the duration of the startup screen.
   useEffect(() => {
-    if (!authLoading) return undefined;
-    let played = false;
-    const playChime = async () => {
-      if (played) return;
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      try {
-        const context = new AudioContextClass();
-        await context.resume();
-        const start = context.currentTime + 0.04;
-        [523.25, 659.25].forEach((frequency, index) => {
-          const oscillator = context.createOscillator();
-          const gain = context.createGain();
-          const at = start + index * 0.16;
-          oscillator.type = "sine";
-          oscillator.frequency.setValueAtTime(frequency, at);
-          gain.gain.setValueAtTime(0.0001, at);
-          gain.gain.exponentialRampToValueAtTime(0.035, at + 0.025);
-          gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.24);
-          oscillator.connect(gain);
-          gain.connect(context.destination);
-          oscillator.start(at);
-          oscillator.stop(at + 0.25);
-        });
-        played = true;
-        window.setTimeout(() => context.close().catch(() => {}), 700);
-      } catch {
-        // Browsers may block audio until a visitor interacts with the page.
-      }
-    };
-    const onInteraction = () => { playChime(); };
-    if (navigator.userActivation?.hasBeenActive) playChime();
-    window.addEventListener("pointerdown", onInteraction, { once: true });
-    window.addEventListener("keydown", onInteraction, { once: true });
+    if (!authLoading || !showStartupSplash) return undefined;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return undefined;
+    let context;
+    let stopTimer;
+    let stopped = false;
+    try {
+      context = new AudioContextClass();
+      const play = async () => {
+        try {
+          await context.resume();
+          if (stopped) return;
+          const startAt = context.currentTime + 0.08;
+          const notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
+          notes.forEach((frequency, index) => {
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            const at = startAt + index * 0.42;
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(frequency, at);
+            gain.gain.setValueAtTime(0.0001, at);
+            gain.gain.linearRampToValueAtTime(0.025, at + 0.07);
+            gain.gain.setTargetAtTime(0.0001, at + 0.22, 0.07);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.start(at);
+            oscillator.stop(at + 0.4);
+          });
+          stopTimer = window.setTimeout(() => context.close().catch(() => {}), 3700);
+        } catch {
+          // Some browsers block sound until the site has previously been interacted with.
+        }
+      };
+      play();
+    } catch {
+      // Audio is optional; loading must continue if audio is unavailable.
+    }
     return () => {
-      window.removeEventListener("pointerdown", onInteraction);
-      window.removeEventListener("keydown", onInteraction);
+      stopped = true;
+      if (stopTimer) window.clearTimeout(stopTimer);
+      if (context && context.state !== "closed") context.close().catch(() => {});
     };
-  }, [authLoading]);
+  }, [authLoading, showStartupSplash]);
 
   // Restore an existing login session instead of logging students out on refresh.
   useEffect(() => {
@@ -360,7 +364,6 @@ function App() {
             <span />
             <span />
           </div>
-          <small className="splash-audio-hint">Tap or click once to enable the loading sound</small>
         </div>
       </div>
     );
