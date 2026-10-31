@@ -1,4 +1,6 @@
-const API_URL = "http://10.0.9.203/skillswap-campus/backend";
+export const API_BASE = `${window.location.protocol}//${window.location.hostname}/skillswap-campus/backend`;
+
+const API_URL = API_BASE;
 
 export async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_URL}/${endpoint}`, {
