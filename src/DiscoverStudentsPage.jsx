@@ -28,9 +28,37 @@ export default function DiscoverStudentsPage({ currentUserId }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");\n  const [selected, setSelected] = useState(null);\n  const [detailLoading, setDetailLoading] = useState(false);\n  const [notice, setNotice] = useState("");\n  const [messageText, setMessageText] = useState("");\n  const [conversation, setConversation] = useState([]);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [messageText, setMessageText] = useState("");
+  const [conversation, setConversation] = useState([]);
 
-  async function openStudent(student) {\n    setSelected(student); setDetailLoading(true); setNotice(""); setConversation([]);\n    try { const result = await apiRequest(`get_student_profile.php?id=${student.id}`); setSelected(result.student); }\n    catch (err) { setNotice(err.message || "Unable to load profile."); }\n    finally { setDetailLoading(false); }\n  }\n\n  async function friendAction(action) {\n    try { const result = await apiRequest("friend_request.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, action }) }); setNotice(result.message); const refreshed = await apiRequest(`get_student_profile.php?id=${selected.id}`); setSelected(refreshed.student); }\n    catch (err) { setNotice(err.message || "Unable to update friend request."); }\n  }\n\n  async function loadConversation() {\n    try { const result = await apiRequest(`messages.php?user_id=${selected.id}`); setConversation(result.messages || []); }\n    catch (err) { setNotice(err.message || "Unable to load messages."); }\n  }\n\n  async function sendMessage(event) {\n    event.preventDefault(); if (!messageText.trim()) return;\n    try { await apiRequest("messages.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, body:messageText.trim() }) }); setMessageText(""); await loadConversation(); }\n    catch (err) { setNotice(err.message || "Unable to send message."); }\n  }\n\n  async function loadStudents() {
+  async function openStudent(student) {
+    setSelected(student); setDetailLoading(true); setNotice(""); setConversation([]);
+    try { const result = await apiRequest(`get_student_profile.php?id=${student.id}`); setSelected(result.student); }
+    catch (err) { setNotice(err.message || "Unable to load profile."); }
+    finally { setDetailLoading(false); }
+  }
+
+  async function friendAction(action) {
+    try { const result = await apiRequest("friend_request.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, action }) }); setNotice(result.message); const refreshed = await apiRequest(`get_student_profile.php?id=${selected.id}`); setSelected(refreshed.student); }
+    catch (err) { setNotice(err.message || "Unable to update friend request."); }
+  }
+
+  async function loadConversation() {
+    try { const result = await apiRequest(`messages.php?user_id=${selected.id}`); setConversation(result.messages || []); }
+    catch (err) { setNotice(err.message || "Unable to load messages."); }
+  }
+
+  async function sendMessage(event) {
+    event.preventDefault(); if (!messageText.trim()) return;
+    try { await apiRequest("messages.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, body:messageText.trim() }) }); setMessageText(""); await loadConversation(); }
+    catch (err) { setNotice(err.message || "Unable to send message."); }
+  }
+
+  async function loadStudents() {
     setLoading(true);
     setError("");
 
@@ -247,6 +275,25 @@ export default function DiscoverStudentsPage({ currentUserId }) {
           ))}
         </div>
       )}
+      {selected && <div className="student-profile-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
+        <section className="student-profile-modal" role="dialog" aria-modal="true" aria-label="Student profile">
+          <button className="student-profile-close" onClick={() => setSelected(null)} aria-label="Close profile">×</button>
+          {detailLoading ? <p>Loading profile...</p> : <>
+            <div className="student-profile-header"><div className="student-avatar student-profile-avatar">{getInitials(selected.full_name)}</div><div><h2>{selected.full_name}</h2><p>{[selected.university,selected.course,selected.year_level].filter(Boolean).join(" · ")}</p></div></div>
+            {selected.bio && <p className="student-profile-bio">{selected.bio}</p>}
+            <div className="student-profile-actions">
+              {!selected.friend_status ? <button onClick={() => friendAction("send")}>Add friend</button> :
+                selected.friend_status.status === "accepted" ? <button onClick={loadConversation}>Open messages</button> :
+                selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? <span>Request sent · Pending</span> :
+                selected.friend_status.status === "pending" ? <><button onClick={() => friendAction("accept")}>Accept request</button><button className="secondary" onClick={() => friendAction("decline")}>Decline</button></> :
+                <button onClick={() => friendAction("send")}>Send friend request</button>}
+            </div>
+            {notice && <p className="student-profile-notice">{notice}</p>}
+            <h3>Skills</h3><div className="student-profile-skills">{(selected.skills || []).map(skill => <div key={skill.id}><strong>{skill.skill_name}</strong><span>{skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}</span>{skill.description && <p>{skill.description}</p>}{skill.skill_type === "offer" && <button onClick={async () => { try { const result = await apiRequest("request_exchange.php", { method:"POST", body:JSON.stringify({skill_id:skill.id}) }); setNotice(result.message); } catch(err) { setNotice(err.message); } }}>Request exchange</button>}</div>)}</div>
+            {selected.friend_status?.status === "accepted" && <div className="student-chat"><h3>Messages</h3><div className="student-chat-history">{conversation.map(item => <p className={Number(item.sender_id)===Number(currentUserId)?"sent":"received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>)}</div><form onSubmit={sendMessage}><input value={messageText} onChange={event=>setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000}/><button type="submit">Send</button></form></div>}
+          </>}
+        </section>
+      </div>}
     </div>
   );
 }
