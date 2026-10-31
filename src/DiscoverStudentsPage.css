@@ -532,3 +532,16 @@
 .student-quick-actions button:disabled{opacity:.45;cursor:not-allowed}
 .student-quick-panel .student-chat{margin-top:16px}
 @media(max-width:520px){.student-quick-panel{padding:22px 17px;border-radius:16px}.student-quick-person{align-items:flex-start;gap:12px}.student-quick-person h2{font-size:17px}.student-quick-actions{display:grid;grid-template-columns:1fr 1fr}.student-quick-actions button.tertiary{margin-left:0;grid-column:1/-1}}
+
+
+/* Skills displayed on the dedicated student profile */
+.student-profile-skills-section{margin-top:24px;padding-top:20px;border-top:1px solid #e8eee5}
+.student-profile-skills-section>h3{margin:0 0 13px;color:#344b38;font-size:15px}
+.student-profile-skills-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.student-profile-skill{padding:15px;border:1px solid #e5ece2;border-radius:12px;background:#f9fbf7}
+.student-profile-skill>div{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.student-profile-skill h4{margin:5px 0 0;color:#263a2b;font-size:14px}
+.student-profile-skill p{margin:10px 0 0;color:#738174;font-size:12px;line-height:1.6;white-space:pre-wrap}
+.skill-type-offer,.skill-type-learn{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#55745f}
+.skill-type-learn{color:#8a805e}
+.student-profile-skill-category{color:#788477;font-size:10px}
