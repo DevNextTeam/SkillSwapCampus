@@ -31,7 +31,6 @@ import SocialPage from "./SocialPage";
 import { apiRequest, API_BASE } from "./api";
 import "./App.css";
 
-const SPLASH_DURATION = 5000;
 
 const navigation = [
   { label: "Dashboard", icon: LayoutDashboard },
@@ -200,8 +199,6 @@ function App() {
   // Restore an existing login session instead of logging students out on refresh.
   useEffect(() => {
     let isMounted = true;
-    let splashTimer;
-    const startTime = Date.now();
 
     async function initializeApp() {
       let restoredUser = null;
@@ -212,21 +209,16 @@ function App() {
         // A missing or expired session should lead to the login screen.
         restoredUser = null;
       } finally {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, SPLASH_DURATION - elapsed);
-        splashTimer = window.setTimeout(() => {
-          if (isMounted) {
-            setUser(restoredUser);
-            setAuthLoading(false);
-          }
-        }, remaining);
+        if (isMounted) {
+          setUser(restoredUser);
+          setAuthLoading(false);
+        }
       }
     }
 
     initializeApp();
     return () => {
       isMounted = false;
-      if (splashTimer) window.clearTimeout(splashTimer);
     };
   }, []);
 
@@ -430,6 +422,10 @@ function App() {
             >
               <Bell size={20} />
               <span />
+            </button>
+
+            <button type="button" className="topbar-logout" onClick={handleLogout} title="Log out">
+              <LogOut size={17} /><span>Log out</span>
             </button>
 
             <button
