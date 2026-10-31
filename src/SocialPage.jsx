@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { MessageCircle, Users, RefreshCw, Send, Check, X, ArrowLeft } from "lucide-react";
-import { apiRequest } from "./api";
+import { apiRequest, API_BASE } from "./api";
 import "./SocialPage.css";
 
-const API_BASE = "http://10.0.9.203/skillswap-campus/backend/";
 function Avatar({ person }) {
-  return <div className="social-avatar">{person.profile_photo ? <img src={API_BASE + person.profile_photo} alt="" /> : (person.full_name || "S").trim().split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase()}</div>;
+  return <div className="social-avatar">{person.profile_photo ? <img src={`${API_BASE}/${person.profile_photo}`} alt="" /> : (person.full_name || "S").trim().split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase()}</div>;
 }
 export default function SocialPage({ currentUserId }) {
   const [data,setData]=useState({incoming_requests:[],friends:[]});
