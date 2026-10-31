@@ -67,9 +67,7 @@ function SchedulePage({ user }) {
     }
   }
 
-  useEffect(() => {
-    loadSchedule();
-  }, []);
+  useEffect(() => {\n    let active = true;\n    Promise.resolve().then(() => { if (active) loadSchedule(); });\n    return () => { active = false; };\n  }, []);
 
   function startEditing(session) {
     const scheduledAt = session.scheduled_at
