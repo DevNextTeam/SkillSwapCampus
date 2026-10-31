@@ -18,6 +18,13 @@ export default function SocialPage({ currentUserId }) {
   const [sending,setSending]=useState(false);
   const refresh=useCallback(async()=>{setLoading(true);setError("");try{setData(await apiRequest("social.php"));}catch(e){setError(e.message||"Unable to load connections.");}finally{setLoading(false);}},[]);
   useEffect(()=>{refresh();},[refresh]);
+  useEffect(()=>{
+    if(!active)return;
+    let mounted=true;
+    const poll=async()=>{try{const result=await apiRequest("messages.php?user_id="+active.user_id);if(mounted)setMessages(result.messages||[]);}catch(e){if(mounted)setNotice(e.message||"Unable to refresh messages.");}};
+    const timer=setInterval(poll,10000);
+    return()=>{mounted=false;clearInterval(timer);};
+  },[active]);
   async function requestAction(user_id,action){try{await apiRequest("friend_request.php",{method:"POST",body:JSON.stringify({user_id,action})});setNotice(action==="accept"?"Friend request accepted.":"Request declined.");await refresh();}catch(e){setNotice(e.message||"Unable to update request.");}}
   async function openChat(friend){setActive(friend);setNotice("");try{const r=await apiRequest("messages.php?user_id="+friend.user_id);setMessages(r.messages||[]);}catch(e){setNotice(e.message||"Unable to load messages.");}}
   async function send(event){event.preventDefault();if(!draft.trim()||!active||sending)return;setSending(true);try{await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:draft.trim()})});setDraft("");const r=await apiRequest("messages.php?user_id="+active.user_id);setMessages(r.messages||[]);await refresh();}catch(e){setNotice(e.message||"Unable to send message.");}finally{setSending(false);}}
