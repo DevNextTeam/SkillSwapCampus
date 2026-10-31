@@ -2763,3 +2763,14 @@ body { background: var(--background); color: var(--text); }
 
 
 .profile-photo-image { width:112px; height:112px; display:block; object-fit:cover; border-radius:50%; }
+
+
+/* Keep account controls reachable on short and small screens. */
+.sidebar { overflow-y: auto; }
+.sidebar-bottom { margin-top: auto; flex-shrink: 0; }
+.topbar-logout { min-height: 40px; white-space: nowrap; }
+@media (max-width: 600px) {
+  .topbar { padding-left: 14px; padding-right: 14px; gap: 8px; }
+  .topbar-actions { gap: 8px; }
+  .topbar-logout { padding: 9px 10px; font-size: 12px; }
+}
