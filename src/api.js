@@ -6,7 +6,7 @@ export async function apiRequest(endpoint, options = {}) {
     ...options,
     credentials: "include",
     headers: {
-      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...((typeof FormData !== "undefined" && options.body instanceof FormData) ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
     },
   });
