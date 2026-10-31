@@ -382,3 +382,16 @@
 .student-avatar img { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
 .student-profile-avatar { overflow:hidden; border-radius:50%; }
 .student-profile-avatar img { width:100%; height:100%; object-fit:cover; }
+
+
+/* Final avatar and profile-card spacing fixes */
+.student-card-top { min-height:78px; margin-bottom:62px; }
+.student-avatar { width:60px; height:60px; bottom:-30px; overflow:hidden; border-radius:50%; }
+.student-avatar img { display:block; width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.student-card-info { min-width:0; }
+.student-card-info h3 { min-height:0; margin:0 0 9px; padding-top:2px; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; line-height:1.35; }
+.student-profile-header { min-width:0; align-items:center; }
+.student-profile-header > div:last-child { min-width:0; overflow-wrap:anywhere; }
+.student-profile-header h2 { overflow-wrap:anywhere; line-height:1.25; }
+.student-profile-avatar { position:static; flex:0 0 72px; width:72px; height:72px; min-width:72px; border-radius:50%; overflow:hidden; }
+@media(max-width:520px) { .student-card-top { margin-bottom:62px; } .student-card-info h3 { font-size:15px; } }
