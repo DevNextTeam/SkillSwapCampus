@@ -73,9 +73,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
     }
   }
 
-  useEffect(() => {
-    loadStudents();
-  }, []);
+  useEffect(() => {\n    let active = true;\n    Promise.resolve().then(() => { if (active) loadStudents(); });\n    return () => { active = false; };\n  }, []);
 
   const filteredStudents = useMemo(() => {
     const keyword = search.trim().toLowerCase();
