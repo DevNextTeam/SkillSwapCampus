@@ -1,8 +1,6 @@
-
 <?php
 
 require_once "config.php";
-
 require_once "db.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -25,6 +23,18 @@ if (!is_array($data)) {
     exit;
 }
 
+$fields = ["full_name", "email", "password", "university", "course", "year_level"];
+foreach ($fields as $field) {
+    if (isset($data[$field]) && !is_string($data[$field])) {
+        http_response_code(400);
+        echo json_encode([
+            "success" => false,
+            "message" => "Please check the registration details and try again."
+        ]);
+        exit;
+    }
+}
+
 $full_name = trim($data["full_name"] ?? "");
 $email = trim($data["email"] ?? "");
 $password = $data["password"] ?? "";
@@ -41,6 +51,21 @@ if ($full_name === "" || $email === "" || $password === "") {
     exit;
 }
 
+$length = function ($value) {
+    return function_exists("mb_strlen") ? mb_strlen($value, "UTF-8") : strlen($value);
+};
+
+if ($length($full_name) > 100 || $length($email) > 150 ||
+    $length($university) > 150 || $length($course) > 100 ||
+    $length($year_level) > 30) {
+    http_response_code(400);
+    echo json_encode([
+        "success" => false,
+        "message" => "One or more fields exceed the allowed length."
+    ]);
+    exit;
+}
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
     echo json_encode([
@@ -50,11 +75,11 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (strlen($password) < 8) {
+if (strlen($password) < 8 || strlen($password) > 72) {
     http_response_code(400);
     echo json_encode([
         "success" => false,
-        "message" => "Password must be at least 8 characters."
+        "message" => "Password must be between 8 and 72 characters."
     ]);
     exit;
 }
@@ -67,7 +92,6 @@ try {
         VALUES (?, ?, ?, ?, ?, ?)";
 
     $stmt = $pdo->prepare($sql);
-
     $stmt->execute([
         $full_name,
         $email,
@@ -78,13 +102,11 @@ try {
     ]);
 
     http_response_code(201);
-
     echo json_encode([
         "success" => true,
         "message" => "Student account created successfully!",
         "user_id" => $pdo->lastInsertId()
     ]);
-
 } catch (PDOException $e) {
     if ($e->getCode() === "23000") {
         http_response_code(409);
