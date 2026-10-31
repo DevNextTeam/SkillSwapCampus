@@ -235,7 +235,7 @@ function App() {
         restoredUser = null;
       } finally {
         // Keep the branded splash visible briefly so startup never flashes past unnoticed.
-        const remaining = Math.max(0, 1800 - (Date.now() - startedAt));
+        const remaining = Math.max(0, 3500 - (Date.now() - startedAt));
         if (remaining) {
           await new Promise((resolve) => window.setTimeout(resolve, remaining));
         }
