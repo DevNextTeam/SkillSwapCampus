@@ -666,6 +666,7 @@ function App() {
           )}
 
         </section>
+        <footer className="footer app-footer"><div className="footer-brand"><strong>SkillSwap Campus</strong><span>Learn together. Grow together.</span></div><span className="footer-copy">A campus community built on sharing knowledge.</span></footer>
       </main>
     </div>
   );
