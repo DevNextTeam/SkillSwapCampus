@@ -515,3 +515,20 @@
  .student-profile-actions { display:grid; grid-template-columns:1fr 1fr; }
  .student-profile-actions button { min-height:42px; }
 }
+
+
+/* Student quick-actions overlay */
+.student-quick-overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(24,35,27,.42);backdrop-filter:blur(4px)}
+.student-quick-panel{position:relative;width:min(560px,100%);max-height:min(82vh,760px);overflow:auto;padding:28px;border:1px solid #e1e9df;border-radius:20px;background:#fff;box-shadow:0 24px 80px rgba(26,43,29,.22)}
+.student-quick-close{position:absolute;top:12px;right:14px;width:34px;height:34px;border:0;border-radius:50%;background:#f0f5ee;color:#496a53;font-size:24px;line-height:1;cursor:pointer}
+.student-quick-person{display:flex;align-items:center;gap:16px;padding-right:28px}
+.student-quick-person .student-profile-avatar{position:static;flex:0 0 68px;width:68px;height:68px;border:3px solid #edf4eb}
+.student-quick-person h2{margin:3px 0 5px;color:#263a2b;font-size:20px;line-height:1.25;overflow-wrap:anywhere}
+.student-quick-person p{margin:0;color:#738174;font-size:12px;line-height:1.5}
+.student-quick-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:22px 0 4px;padding-bottom:18px;border-bottom:1px solid #e8eee5}
+.student-quick-actions button{min-height:39px;padding:9px 14px;border:1px solid #55745f;border-radius:9px;background:#55745f;color:white;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.student-quick-actions button.secondary{border-color:#dce7d9;background:#f0f5ee;color:#496a53}
+.student-quick-actions button.tertiary{margin-left:auto;border-color:#e2e9df;background:white;color:#55745f}
+.student-quick-actions button:disabled{opacity:.45;cursor:not-allowed}
+.student-quick-panel .student-chat{margin-top:16px}
+@media(max-width:520px){.student-quick-panel{padding:22px 17px;border-radius:16px}.student-quick-person{align-items:flex-start;gap:12px}.student-quick-person h2{font-size:17px}.student-quick-actions{display:grid;grid-template-columns:1fr 1fr}.student-quick-actions button.tertiary{margin-left:0;grid-column:1/-1}}
