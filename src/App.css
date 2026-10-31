@@ -2505,3 +2505,139 @@ body { background: var(--background); color: var(--text); }
   .page-content { padding: 24px 18px 24px; }
   .topbar { min-height: 66px; padding: 0 18px; }
 }
+
+
+/* =========================================
+   SKILLSWAP CAMPUS — RESPONSIVE BLUE / CHARCOAL SYSTEM
+========================================= */
+:root {
+  --primary: #075bdb;
+  --primary-dark: #0648b4;
+  --primary-light: #eaf2ff;
+  --sage: #e7effb;
+  --text: #172033;
+  --muted: #657187;
+  --border: #dfe5ef;
+  --surface: #ffffff;
+  --background: #f1f4f9;
+  --radius: 16px;
+  --shadow-card: 0 8px 24px rgba(16, 24, 39, .07), 0 2px 6px rgba(16, 24, 39, .04);
+  --shadow-hover: 0 14px 32px rgba(16, 24, 39, .12);
+}
+
+body { background: var(--background); color: var(--text); }
+.app-shell { background: var(--background); }
+.sidebar, .topbar { background: #fff; }
+.sidebar { border-right-color: #d8deea; box-shadow: 5px 0 24px rgba(16,24,39,.035); }
+.sidebar-label { display: none; }
+.brand-mark { background: #eaf2ff; color: var(--primary); box-shadow: none; }
+.brand h2, .breadcrumb strong, .welcome-row h1, .section-heading h2,
+.profile-intro h2, .profile-form-heading h2, .stat-card strong { color: #111827; }
+.nav-item { color: #475267; }
+.nav-item:hover { background: #f0f4fb; color: var(--primary-dark); }
+.nav-active { background: #e8f0ff; color: #0648b4; }
+.help-card { background: #172033; border-color: #172033; color: #fff; box-shadow: var(--shadow-card); }
+.help-card h3, .help-card p, .help-card button { color: #f8fafc; }
+.profile-mini { border-top: 1px solid var(--border); }
+.topbar { border-bottom-color: #dce2ec; box-shadow: 0 3px 14px rgba(16,24,39,.035); }
+.icon-button { color: #475267; }
+.icon-button:hover { background: #eaf2ff; color: var(--primary); }
+.page-content { padding-top: 30px; }
+.welcome-row { margin-bottom: 24px; }
+.eyebrow { color: var(--primary-dark); font-size: 11px; letter-spacing: 1px; }
+.welcome-row h1 { margin: 8px 0 5px; }
+.page-subtitle { color: #657187; font-size: 14px; line-height: 1.5; }
+.primary-button, .hero-button { background: var(--primary); box-shadow: 0 5px 14px rgba(7,91,219,.18); }
+.primary-button:hover, .hero-button:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(7,91,219,.23); }
+.hero-banner { background: linear-gradient(120deg,#172033,#26364f); border: 1px solid #111827; color: #fff; box-shadow: var(--shadow-card); }
+.hero-copy h2 { color: #fff; }
+.hero-copy p { color: #d4dbea; }
+.hero-tag { color: #075bdb; border: 0; }
+.art-card { box-shadow: 0 12px 28px rgba(0,0,0,.18); }
+.stat-card, .skill-card, .database-skill-card, .exchange-card, .schedule-card,
+.profile-intro, .profile-form, .skill-form-card, .skills-empty, .exchanges-empty {
+  border-color: #dce2ec;
+  box-shadow: var(--shadow-card);
+}
+.stat-card:hover, .skill-card:hover, .database-skill-card:hover, .exchange-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+.stat-icon { background: #eaf2ff; color: var(--primary); }
+.stat-card > span, .stat-card small { color: #657187; }
+.search-bar, .skills-search { border-color: #d7dfeb; box-shadow: 0 3px 12px rgba(16,24,39,.035); }
+.search-bar:focus-within, .skills-search:focus-within { border-color: #75a5f5; box-shadow: 0 0 0 4px rgba(7,91,219,.10); }
+.skill-art, .skill-blue, .skill-purple, .skill-orange { background: #edf2fa; color: #075bdb; }
+.skill-art-icon { color: #075bdb; }
+.request-button, .requested-button { border-color: #cbdaf3; background: #edf4ff; color: #0648b4; }
+.request-button:hover { background: #dfeaff; border-color: #9bbcf0; }
+.footer { margin-top: 32px; padding: 22px 24px; border: 1px solid #dce2ec; border-radius: 16px; background: #172033; color: #cbd5e1; box-shadow: var(--shadow-card); }
+.footer-brand { display: grid; gap: 4px; }
+.footer-brand strong { color: #fff; font-size: 14px; }
+.footer-brand span, .footer-copy { color: #aebbd0; font-size: 12px; }
+.profile-avatar-button { border: 0; cursor: pointer; }
+.logout-button { margin-left: auto; color: #475267; }
+.logout-button:hover { background: #fff0f0; color: #b42332; }
+.profile-large-avatar { background: #eaf2ff; color: #075bdb; box-shadow: inset 0 0 0 1px #d6e5ff; }
+.profile-form, .profile-intro { border-radius: 18px; }
+.profile-field input, .profile-field select, .profile-field textarea { border-color: #dce3ee; }
+.profile-field input:focus, .profile-field select:focus, .profile-field textarea:focus { border-color: #75a5f5; box-shadow: 0 0 0 3px rgba(7,91,219,.10); }
+.mobile-overlay { background: rgba(12,20,34,.48); backdrop-filter: blur(3px); }
+
+/* Responsive layout refinements */
+@media (max-width: 1100px) {
+  .page-content { padding-left: 28px; padding-right: 28px; }
+  .hero-banner { padding: 30px; }
+  .stats-grid, .skills-grid { gap: 14px; }
+  .stat-card { padding: 18px; }
+}
+@media (max-width: 900px) {
+  .sidebar { box-shadow: 14px 0 40px rgba(16,24,39,.16); }
+  .main-content { margin-left: 0; }
+  .mobile-menu, .mobile-close { display: grid; }
+  .topbar { min-height: 66px; padding: 0 20px; }
+  .page-content { padding: 24px 20px; }
+  .welcome-row { align-items: flex-start; }
+  .hero-art { transform: scale(.86); transform-origin: right center; margin-left: -25px; }
+}
+@media (max-width: 680px) {
+  .topbar { min-height: 60px; padding: 0 14px; }
+  .breadcrumb { font-size: 13px; }
+  .topbar-actions { gap: 10px; }
+  .topbar-actions .avatar { width: 35px; height: 35px; }
+  .page-content { padding: 20px 14px 24px; }
+  .welcome-row { display: block; margin-bottom: 20px; }
+  .welcome-row h1 { font-size: 27px; }
+  .welcome-row > .primary-button { margin-top: 14px; }
+  .hero-banner { min-height: 0; padding: 24px 20px; }
+  .hero-art { display: none; }
+  .hero-copy h2 { font-size: 27px; }
+  .hero-copy p { font-size: 14px; line-height: 1.6; }
+  .stats-grid { grid-template-columns: 1fr; gap: 10px; margin: 16px 0 26px; }
+  .stat-card { min-height: 0; grid-template-columns: 42px 1fr; align-items: center; column-gap: 12px; padding: 14px; }
+  .stat-icon { grid-row: span 2; width: 42px; height: 42px; margin: 0; }
+  .stat-card > span { align-self: end; }
+  .stat-card strong { grid-column: 2; margin: 0; font-size: 22px; }
+  .stat-card small { display: none; }
+  .section-heading { align-items: flex-start; }
+  .section-heading h2 { font-size: 20px; }
+  .section-heading p { font-size: 13px; }
+  .skills-grid, .database-skills-grid { grid-template-columns: 1fr; }
+  .footer { display: grid; gap: 10px; margin-top: 24px; padding: 17px; }
+  .profile-page { margin: 12px auto; }
+  .profile-intro { padding: 18px; gap: 14px; }
+  .profile-large-avatar { width: 58px; height: 58px; border-radius: 17px; font-size: 20px; }
+  .profile-intro h2 { font-size: 19px; }
+  .profile-form { padding: 18px; }
+  .profile-fields { grid-template-columns: 1fr; gap: 15px; }
+  .profile-field-full { grid-column: auto; }
+  .footer-copy { line-height: 1.5; }
+}
+@media (max-width: 420px) {
+  .breadcrumb { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar { padding: 0 10px; }
+  .topbar-actions { gap: 6px; }
+  .page-content { padding-left: 12px; padding-right: 12px; }
+  .primary-button { padding: 12px 15px; font-size: 13px; }
+  .hero-banner { border-radius: 15px; }
+  .hero-copy h2 { font-size: 24px; }
+}
