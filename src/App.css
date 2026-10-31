@@ -2459,3 +2459,49 @@ button:disabled {
   object-fit: contain;
   padding: 3px;
 }
+
+
+/* =========================================
+   SKILLSWAP CAMPUS — UI REDESIGN FOUNDATION
+   Safe visual overrides; existing page logic is unchanged.
+========================================= */
+:root {
+  --primary: #075bdb;
+  --primary-dark: #0648b4;
+  --primary-light: #eaf2ff;
+  --sage: #eaf2ff;
+  --text: #172033;
+  --muted: #647084;
+  --border: #e2e7ef;
+  --surface: #ffffff;
+  --background: #f4f6fa;
+  --radius: 14px;
+}
+body { background: var(--background); color: var(--text); }
+.app-shell { background: var(--background); }
+.sidebar { border-right-color: #e5e9f0; box-shadow: 3px 0 18px #14213b08; }
+.brand-mark { background: var(--primary); box-shadow: 0 5px 15px #075bdb26; }
+.nav-item { border-radius: 10px; }
+.nav-item:hover { background: #f0f5ff; color: var(--primary-dark); }
+.nav-active { background: #eaf2ff; color: var(--primary-dark); }
+.help-card { background: #f0f5ff; border-color: #e0eaff; color: var(--primary-dark); }
+.help-card h3 { color: #172033; }
+.help-card p { color: #647084; }
+.main-content { background: var(--background); }
+.topbar { border-bottom-color: var(--border); box-shadow: 0 2px 12px #14213b05; }
+.breadcrumb strong { color: #172033; }
+.icon-button:hover { background: var(--primary-light); color: var(--primary-dark); }
+.page-content { padding-top: 32px; }
+.primary-button, .hero-button { background: var(--primary); border-radius: 9px; }
+.primary-button:hover, .hero-button:hover { background: var(--primary-dark); }
+.search-bar:focus-within, .skills-search:focus-within { border-color: #75a5f5; box-shadow: 0 0 0 3px #075bdb16; }
+.skill-card, .stat-card, .database-skill-card, .profile-intro, .profile-form { border-color: var(--border); box-shadow: 0 3px 14px #14213b08; }
+.profile-large-avatar { background: #eaf2ff; color: var(--primary-dark); }
+.profile-field input:focus, .profile-field select:focus, .profile-field textarea:focus { border-color: #75a5f5; box-shadow: 0 0 0 3px #075bdb16; }
+.logout-button, .topbar-logout { border-color: var(--border); color: var(--primary-dark); }
+.logout-button:hover, .topbar-logout:hover { background: var(--primary-light); border-color: #c8dcff; }
+.footer { border-top-color: var(--border); }
+@media (max-width: 760px) {
+  .page-content { padding: 24px 18px 24px; }
+  .topbar { min-height: 66px; padding: 0 18px; }
+}
