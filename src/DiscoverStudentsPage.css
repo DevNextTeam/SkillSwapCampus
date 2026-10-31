@@ -320,3 +320,31 @@
 .student-skills-group.wanted .student-skill-tags span { background: #f1f3f6; color: #536174; }
 .discover-filters button.active { background: #075bdb; border-color: #075bdb; }
 .discover-error button { background: #075bdb; }
+
+/* LinkedIn-inspired people directory */
+.discover-heading h2, .discover-heading p, .discover-eyebrow { display:none; }
+.discover-page { gap:18px; }
+.discover-heading { min-height:0; justify-content:flex-end; }
+.discover-toolbar { gap:12px; }
+.discover-search { max-width:620px; min-height:46px; border-radius:10px; }
+.discover-filters button { border-radius:9px; padding:9px 13px; }
+.discover-grid { grid-template-columns:repeat(auto-fill,minmax(245px,1fr)); gap:16px; }
+.student-card { padding:0 18px 18px; overflow:hidden; border-radius:15px; }
+.student-card-top { position:relative; min-height:76px; margin:0 -18px 34px; padding:14px 16px; align-items:flex-start; background:linear-gradient(120deg,#edf3fb,#f7f9fc); }
+.student-avatar { position:absolute; left:18px; bottom:-27px; width:58px; height:58px; border:3px solid #fff; border-radius:50%; background:#dce9fb; color:#174d9c; }
+.student-member-label { background:#fff; color:#536174; font-weight:600; }
+.student-card-info h3 { min-height:20px; margin-bottom:7px; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.student-university { color:#536174; font-size:12px; }
+.student-course { color:#778397; font-size:11px; }
+.student-bio { min-height:0; margin:10px 0 12px; -webkit-line-clamp:2; }
+.student-skills-group { margin-top:12px; }
+.student-skills-group h4 { margin-bottom:7px; font-size:11px; }
+.student-skill-tags { gap:5px; }
+.student-skill-tags span { padding:5px 8px; font-size:10px; }
+.student-skill-tags small { font-size:11px; }
+@media(max-width:520px) {
+ .discover-grid { grid-template-columns:1fr; }
+ .discover-heading { display:none; }
+ .discover-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .discover-filters button { padding:9px 5px; font-size:11px; }
+}
