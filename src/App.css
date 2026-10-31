@@ -2829,3 +2829,34 @@ body { background: var(--background); color: var(--text); }
 @media (max-width: 760px) {
   .app-footer { align-items:flex-start; flex-direction:column; gap:8px; padding:20px 22px; }
 }
+
+
+/* Profile card: keep the photo, name and editor controls in separate responsive areas */
+.profile-modern-card { display:grid; grid-template-columns:112px minmax(0,1fr) auto; align-items:start; column-gap:22px; row-gap:18px; }
+.profile-photo-wrap { display:flex; flex-direction:column; align-items:center; gap:10px; min-width:0; }
+.profile-large-avatar { width:96px; height:96px; border-radius:50%; overflow:hidden; }
+.profile-photo-image { display:block; object-fit:cover; }
+.profile-identity { min-width:0; overflow-wrap:anywhere; }
+.profile-identity h2 { margin:0 0 8px; overflow-wrap:anywhere; line-height:1.25; }
+.profile-bio-editor { display:block; width:100%; max-width:100%; min-width:0; resize:vertical; }
+.profile-edit-fields { grid-column:1/-1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; width:100%; min-width:0; }
+.profile-edit-fields label { display:flex; flex-direction:column; gap:7px; min-width:0; color:var(--text); font-size:13px; font-weight:700; }
+.profile-edit-fields input,.profile-edit-fields select { width:100%; min-width:0; max-width:100%; padding:12px 13px; border:1px solid var(--border); border-radius:10px; background:#fff; color:var(--text); font:inherit; font-weight:400; }
+.profile-form-actions { grid-column:3; display:flex; flex-wrap:wrap; justify-content:flex-end; align-self:start; gap:9px; margin:0; }
+.profile-photo-upload { max-width:100%; color:var(--primary-dark); font-size:12px; font-weight:800; cursor:pointer; text-align:center; overflow-wrap:anywhere; }
+.profile-photo-upload input { display:block; width:100%; max-width:190px; margin-top:6px; font-size:11px; }
+@media(max-width:760px) {
+ .profile-modern-card { grid-template-columns:88px minmax(0,1fr); column-gap:15px; }
+ .profile-large-avatar { width:78px; height:78px; }
+ .profile-edit-button,.profile-form-actions { grid-column:1/-1; justify-self:stretch; }
+ .profile-form-actions { justify-content:flex-end; }
+ .profile-edit-fields { grid-template-columns:minmax(0,1fr); }
+ .profile-photo-wrap { grid-row:1 / span 2; }
+}
+@media(max-width:420px) {
+ .profile-modern-card { grid-template-columns:minmax(0,1fr); padding:18px; }
+ .profile-photo-wrap { grid-row:auto; align-items:flex-start; }
+ .profile-identity,.profile-edit-fields,.profile-form-actions,.profile-edit-button { grid-column:1; width:100%; }
+ .profile-form-actions button,.profile-edit-button { min-height:42px; }
+ .profile-edit-fields { gap:13px; }
+}
