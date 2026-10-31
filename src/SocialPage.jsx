@@ -24,7 +24,7 @@ export default function SocialPage({ currentUserId }) {
   return <div className="social-page">
     <div className="social-page-heading"><div><span className="social-kicker"><Users size={15}/> CAMPUS COMMUNITY</span><h2>Friends & messages</h2><p>Manage friend requests and continue your conversations.</p></div><button onClick={refresh} disabled={loading}><RefreshCw size={16}/> Refresh</button></div>
     {notice&&<p className="social-notice">{notice}</p>}{error&&<p className="social-error">{error}</p>}
-    <div className="social-layout">
+    <div className={"social-layout "+(active?"chat-open":"")}>
       <section className="social-list-panel">
         <div className="social-section-title"><h3>Friend requests</h3><span>{data.incoming_requests.length}</span></div>
         {loading?<p className="social-muted">Loading requests...</p>:data.incoming_requests.length===0?<p className="social-muted">No pending friend requests.</p>:data.incoming_requests.map(person=><div className="social-person" key={person.request_id}><Avatar person={person}/><div className="social-person-copy"><strong>{person.full_name}</strong><small>{person.university||"Campus member"}</small></div><div className="social-person-actions"><button title="Accept" onClick={()=>requestAction(person.user_id,"accept")}><Check size={16}/></button><button title="Decline" className="social-decline" onClick={()=>requestAction(person.user_id,"decline")}><X size={16}/></button></div></div>)}
