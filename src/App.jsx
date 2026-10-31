@@ -28,7 +28,7 @@ import ExchangesPage from "./ExchangesPage";
 import SchedulePage from "./SchedulePage";
 import DiscoverStudentsPage from "./DiscoverStudentsPage";
 import SocialPage from "./SocialPage";
-import { apiRequest } from "./api";
+import { apiRequest, API_BASE } from "./api";
 import "./App.css";
 
 const SPLASH_DURATION = 5000;
@@ -117,7 +117,7 @@ function ProfilePage({ user, onProfileUpdated }) {
   return (
     <div className="profile-page">
       <form className="profile-intro profile-modern-card" onSubmit={handleSubmit}>
-        <div className="profile-photo-wrap">{user.profile_photo ? <img className="profile-large-avatar profile-photo-image" src={`http://10.0.9.203/skillswap-campus/backend/${user.profile_photo}`} alt={`${form.full_name} profile`} /> : <div className="profile-large-avatar">{initials}</div>}{editing && <label className="profile-photo-upload">{photoUploading ? "Uploading..." : "Change photo"}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} disabled={photoUploading} /></label>}</div>
+        <div className="profile-photo-wrap">{user.profile_photo ? <img className="profile-large-avatar profile-photo-image" src={`${API_BASE}/${user.profile_photo}`} alt={`${form.full_name} profile`} /> : <div className="profile-large-avatar">{initials}</div>}{editing && <label className="profile-photo-upload">{photoUploading ? "Uploading..." : "Change photo"}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} disabled={photoUploading} /></label>}</div>
         <div className="profile-identity">
           <h2 title={form.full_name}>{form.full_name || "Your Name"}</h2>
           {editing ? (
