@@ -175,6 +175,10 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState("");
 
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -195,6 +199,26 @@ function App() {
     loadDashboardSkills();
     return () => { active = false; };
   }, []);
+
+  async function loadNotifications() {
+    setNotificationsLoading(true);
+    setNotificationsError("");
+    try {
+      const result = await apiRequest("notifications.php");
+      setNotifications(result.notifications || []);
+    } catch (error) {
+      setNotificationsError(error.message || "Unable to load notifications.");
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    loadNotifications();
+    const timer = window.setInterval(loadNotifications, 30000);
+    return () => window.clearInterval(timer);
+  }, [user?.id]);
 
   // Restore an existing login session instead of logging students out on refresh.
   useEffect(() => {
@@ -373,7 +397,6 @@ function App() {
 
             <div className="profile-mini-info">
               <strong>{user.full_name}</strong>
-              <span>{user.university || "Campus Member"}</span>
             </div>
 
             <button
@@ -415,18 +438,16 @@ function App() {
           </div>
 
           <div className="topbar-actions">
-            <button
-              className="icon-button notification-button"
-              aria-label="Notifications"
-              title="Notifications"
-            >
-              <Bell size={20} />
-              <span />
-            </button>
-
-            <button type="button" className="topbar-logout" onClick={handleLogout} title="Log out">
-              <LogOut size={17} /><span>Log out</span>
-            </button>
+            <div className="notification-wrap">
+              <button type="button" className="icon-button notification-button" aria-label="Notifications" title="Notifications" aria-expanded={notificationsOpen} onClick={() => { const next = !notificationsOpen; setNotificationsOpen(next); if (next) loadNotifications(); }}>
+                <Bell size={20} />
+                {notifications.length > 0 && <span className="notification-count">{notifications.length > 9 ? "9+" : notifications.length}</span>}
+              </button>
+              {notificationsOpen && <div className="notification-panel">
+                <div className="notification-panel-heading"><div><strong>Notifications</strong><small>Your campus activity</small></div><button type="button" onClick={loadNotifications} aria-label="Refresh notifications">Refresh</button></div>
+                {notificationsLoading ? <p className="notification-empty">Loading notifications…</p> : notificationsError ? <p className="notification-empty notification-error">{notificationsError}</p> : notifications.length === 0 ? <p className="notification-empty">You're all caught up. New friend requests, messages, and exchange activity will appear here.</p> : <div className="notification-list">{notifications.map((item) => <button type="button" className="notification-item" key={item.id} onClick={() => { setNotificationsOpen(false); setActivePage(item.type === "message" || item.type === "friend_request" ? "Friends & Messages" : "My Exchanges"); }}><span className="notification-item-icon"><Bell size={16}/></span><span><strong>{item.title}</strong><small>{item.message}</small><time>{item.created_at}</time></span></button>)}</div>}
+              </div>}
+            </div>
 
             <button
               type="button"
