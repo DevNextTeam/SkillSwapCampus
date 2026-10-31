@@ -270,6 +270,10 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                     )}
                   </div>
                 </div>
+                <div className="student-card-footer">
+                  <span>View profile</span>
+                  <span aria-hidden="true">→</span>
+                </div>
               </div>
             </article>
           ))}
@@ -283,14 +287,14 @@ export default function DiscoverStudentsPage({ currentUserId }) {
             <div className="student-profile-header"><div className="student-avatar student-profile-avatar">{selected.profile_photo ? <img src={`${API_BASE}/${selected.profile_photo}`} alt="" /> : getInitials(selected.full_name)}</div><div className="student-profile-identity"><span className="profile-member-pill">CAMPUS MEMBER</span><h2>{selected.full_name}</h2><p>{[selected.university,selected.course,selected.year_level].filter(Boolean).join(" · ")}</p></div></div>
             {selected.bio && <p className="student-profile-bio">{selected.bio}</p>}
             <div className="student-profile-actions">
-              {!selected.friend_status ? <button onClick={() => friendAction("send")}>Add friend</button> :
-                selected.friend_status.status === "accepted" ? <button onClick={loadConversation}>Open messages</button> :
+              <button type="button" className="profile-view-button" onClick={() => { setConversation([]); setNotice("You're viewing this student's public profile."); }}>View profile</button>
+              {!selected.friend_status ? <button type="button" onClick={() => friendAction("send")}>Add friend</button> :
+                selected.friend_status.status === "accepted" ? <button type="button" onClick={loadConversation}>Send message</button> :
                 selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? <span>Request sent · Pending</span> :
-                selected.friend_status.status === "pending" ? <><button onClick={() => friendAction("accept")}>Accept request</button><button className="secondary" onClick={() => friendAction("decline")}>Decline</button></> :
-                <button onClick={() => friendAction("send")}>Send friend request</button>}
+                selected.friend_status.status === "pending" ? <><button type="button" onClick={() => friendAction("accept")}>Accept request</button><button type="button" className="secondary" onClick={() => friendAction("decline")}>Decline</button></> :
+                <button type="button" onClick={() => friendAction("send")}>Add friend</button>}
             </div>
             {notice && <p className="student-profile-notice">{notice}</p>}
-            <div className="student-profile-section-heading"><div><span>SKILL EXCHANGE</span><h3>Skills & interests</h3></div><Sparkles size={19}/></div><div className="student-profile-skills">{(selected.skills || []).map(skill => <div key={skill.id}><strong>{skill.skill_name}</strong><span>{skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}</span>{skill.description && <p>{skill.description}</p>}{skill.skill_type === "offer" && <button onClick={async () => { try { const result = await apiRequest("request_exchange.php", { method:"POST", body:JSON.stringify({skill_id:skill.id}) }); setNotice(result.message); } catch(err) { setNotice(err.message); } }}>Request exchange</button>}</div>)}</div>
             {selected.friend_status?.status === "accepted" && <div className="student-chat"><div className="student-profile-section-heading"><div><span>PRIVATE CONVERSATION</span><h3>Messages</h3></div></div><div className="student-chat-history">{conversation.map(item => <p className={Number(item.sender_id)===Number(currentUserId)?"sent":"received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>)}</div><form onSubmit={sendMessage}><input value={messageText} onChange={event=>setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000}/><button type="submit">Send</button></form></div>}
           </>}
         </section>
