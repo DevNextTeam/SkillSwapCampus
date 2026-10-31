@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import AppFooter from "./AppFooter";
 
 import {
   LayoutDashboard,
@@ -462,7 +463,7 @@ function App() {
               aria-label="Open my profile"
               title="My Profile"
             >
-              {userInitials}
+              {user.profile_photo ? <img src={API_BASE + "/" + user.profile_photo} alt="" /> : userInitials}
             </button>
           </div>
         </header>
@@ -651,7 +652,7 @@ function App() {
           )}
 
         </section>
-        <footer className="footer app-footer"><div className="footer-brand"><strong>SkillSwap Campus</strong><span>Learn together. Grow together.</span></div><span className="footer-copy">A campus community built on sharing knowledge.</span></footer>
+        <AppFooter onNavigate={(page) => { setActivePage(page); if (page === "Explore Skills") setSkillMode("browse"); }} />
       </main>
     </div>
   );
