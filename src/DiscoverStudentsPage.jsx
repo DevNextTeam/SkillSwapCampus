@@ -9,7 +9,7 @@ import {
   RefreshCw,
   UserRound,
 } from "lucide-react";
-import { apiRequest } from "./api";
+import { apiRequest, API_BASE } from "./api";
 import "./DiscoverStudentsPage.css";
 
 function getInitials(name = "") {
@@ -210,7 +210,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
           {filteredStudents.map((student) => (
             <article className="student-card student-card-clickable" key={student.id} role="button" tabIndex={0} onClick={() => openStudent(student)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openStudent(student); } }}>
               <div className="student-card-top">
-                <div className="student-avatar">{student.profile_photo ? <img src={`http://10.0.9.203/skillswap-campus/backend/${student.profile_photo}`} alt="" /> : getInitials(student.full_name)}</div>
+                <div className="student-avatar">{student.profile_photo ? <img src={`${API_BASE}/${student.profile_photo}`} alt="" /> : getInitials(student.full_name)}</div>
 
                 <span className="student-member-label">
                   Campus member
@@ -279,7 +279,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
         <section className="student-profile-modal" role="dialog" aria-modal="true" aria-label="Student profile">
           <button className="student-profile-close" onClick={() => setSelected(null)} aria-label="Close profile">×</button>
           {detailLoading ? <p>Loading profile...</p> : <>
-            <div className="student-profile-header"><div className="student-avatar student-profile-avatar">{selected.profile_photo ? <img src={`http://10.0.9.203/skillswap-campus/backend/${selected.profile_photo}`} alt="" /> : getInitials(selected.full_name)}</div><div><h2>{selected.full_name}</h2><p>{[selected.university,selected.course,selected.year_level].filter(Boolean).join(" · ")}</p></div></div>
+            <div className="student-profile-header"><div className="student-avatar student-profile-avatar">{selected.profile_photo ? <img src={`${API_BASE}/${selected.profile_photo}`} alt="" /> : getInitials(selected.full_name)}</div><div><h2>{selected.full_name}</h2><p>{[selected.university,selected.course,selected.year_level].filter(Boolean).join(" · ")}</p></div></div>
             {selected.bio && <p className="student-profile-bio">{selected.bio}</p>}
             <div className="student-profile-actions">
               {!selected.friend_status ? <button onClick={() => friendAction("send")}>Add friend</button> :
