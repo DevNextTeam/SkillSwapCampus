@@ -28,8 +28,12 @@ export async function apiRequest(endpoint, options = {}) {
     );
   }
 
-  if (!data || typeof data !== "object") {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error("The server returned an invalid response. Please try again.");
+  }
+
+  if (data.success === false) {
+    throw new Error(data.message || "The request could not be completed. Please try again.");
   }
 
   return data;
