@@ -638,3 +638,70 @@
     transition: none;
   }
 }
+
+
+/* =========================================
+   SKILLSWAP CAMPUS — CENTERED AUTH REDESIGN
+   Keeps the existing login/register form and handlers.
+========================================= */
+.auth-page {
+  min-height: 100vh;
+  padding: 28px 20px;
+  background: #f4f6fa;
+  color: #172033;
+}
+.auth-background-shape { display: none; }
+.auth-layout {
+  width: min(100%, 460px);
+  min-height: 0;
+  display: block;
+  overflow: visible;
+  border: 1px solid #e5e9f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 55px rgba(20, 33, 59, 0.09);
+}
+.auth-brand-panel { display: none; }
+.auth-form-panel { padding: 38px 38px 42px; }
+.auth-card { max-width: 100%; }
+.auth-mobile-brand {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 30px;
+}
+.auth-mobile-brand .auth-brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #eaf2ff;
+  box-shadow: none;
+}
+.auth-mobile-brand strong {
+  color: #172033;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+}
+.auth-heading { margin-bottom: 24px; }
+.auth-kicker { color: #075bdb; }
+.auth-heading h2 { color: #172033; }
+.auth-heading p { color: #647084; }
+.auth-input-wrap, .auth-field input, .auth-field select {
+  border-color: #e0e6ef;
+}
+.auth-field input:focus, .auth-field select:focus, .auth-input-wrap:focus-within {
+  border-color: #75a5f5;
+  box-shadow: 0 0 0 3px #075bdb16;
+}
+.auth-submit-button, .auth-primary-button {
+  background: #075bdb;
+  border-radius: 10px;
+}
+.auth-submit-button:hover, .auth-primary-button:hover { background: #0648b4; }
+.auth-switch button { color: #075bdb; }
+@media (max-width: 520px) {
+  .auth-page { padding: 16px; }
+  .auth-layout { border-radius: 15px; }
+  .auth-form-panel { padding: 28px 22px 32px; }
+}
