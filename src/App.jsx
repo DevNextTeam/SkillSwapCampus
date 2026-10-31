@@ -31,37 +31,6 @@ import "./App.css";
 
 const SPLASH_DURATION = 5000;
 
-// Temporary dashboard recommendations removed; dashboard uses live skill posts.
-const skills = [
-  {
-    title: "Web Development",
-    category: "Programming",
-    teacher: "Alex Morgan",
-    initials: "AM",
-    color: "blue",
-    level: "Intermediate",
-    icon: Code2,
-  },
-  {
-    title: "UI/UX Design",
-    category: "Creative Arts",
-    teacher: "Jamie Lee",
-    initials: "JL",
-    color: "purple",
-    level: "Beginner friendly",
-    icon: Palette,
-  },
-  {
-    title: "Japanese Language",
-    category: "Languages",
-    teacher: "Taylor Kim",
-    initials: "TK",
-    color: "orange",
-    level: "All levels",
-    icon: Languages,
-  },
-];
-
 const navigation = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "Discover Students", icon: Search },
@@ -442,12 +411,7 @@ function App() {
         .toUpperCase()
     : "ST";
 
-  // FILTER TEMPORARY DASHBOARD RECOMMENDATIONS.
-  const filteredSkills = skills.filter((skill) =>
-    `${skill.title} ${skill.category} ${skill.teacher}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+
 
   // LOGO AND ANIMATED LOADING SCREEN.
   if (authLoading) {
