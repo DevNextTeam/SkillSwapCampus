@@ -34,6 +34,13 @@ try {
     }
 
     if ($action === "send") {
+        $accepted = $pdo->prepare("SELECT id FROM friend_requests WHERE status = 'accepted' AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) LIMIT 1");
+        $accepted->execute([$me, $target, $target, $me]);
+        if ($accepted->fetchColumn()) {
+            echo json_encode(["success" => true, "message" => "You are already friends."]);
+            exit;
+        }
+
         // An incoming pending request should be accepted, not duplicated in reverse.
         $incoming = $pdo->prepare("SELECT id FROM friend_requests WHERE sender_id = ? AND receiver_id = ? AND status = 'pending' LIMIT 1");
         $incoming->execute([$target, $me]);
