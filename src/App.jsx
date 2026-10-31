@@ -360,6 +360,7 @@ function App() {
             <span />
             <span />
           </div>
+          <small className="splash-audio-hint">Tap or click once to enable the loading sound</small>
         </div>
       </div>
     );
