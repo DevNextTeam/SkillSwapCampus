@@ -225,6 +225,7 @@ function App() {
     let isMounted = true;
 
     async function initializeApp() {
+      const startedAt = Date.now();
       let restoredUser = null;
       try {
         const result = await apiRequest("me.php");
@@ -233,6 +234,11 @@ function App() {
         // A missing or expired session should lead to the login screen.
         restoredUser = null;
       } finally {
+        // Keep the branded splash visible briefly so startup never flashes past unnoticed.
+        const remaining = Math.max(0, 550 - (Date.now() - startedAt));
+        if (remaining) {
+          await new Promise((resolve) => window.setTimeout(resolve, remaining));
+        }
         if (isMounted) {
           setUser(restoredUser);
           setAuthLoading(false);
@@ -303,12 +309,16 @@ function App() {
             className="splash-logo"
           />
 
-          <div className="splash-loader" aria-label="Loading">
+          <h1>SkillSwap Campus</h1>
+          <p>Learn together. Grow together.</p>
+          <div className="splash-loader" role="status" aria-label="Loading your campus community">
             <span />
             <span />
             <span />
           </div>
+          <small>Getting your campus community ready…</small>
         </div>
+        <div className="splash-footer">PEER-TO-PEER LEARNING</div>
       </div>
     );
   }
