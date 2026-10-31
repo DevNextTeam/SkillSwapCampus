@@ -208,7 +208,7 @@ function App() {
       try {
         const result = await apiRequest("me.php");
         restoredUser = result.user || null;
-      } catch (error) {
+      } catch {
         // A missing or expired session should lead to the login screen.
         restoredUser = null;
       } finally {
