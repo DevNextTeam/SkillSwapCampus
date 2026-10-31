@@ -705,3 +705,105 @@
   .auth-layout { border-radius: 15px; }
   .auth-form-panel { padding: 28px 22px 32px; }
 }
+
+
+/* =========================================
+   AUTH POLISH — CLEARER TYPE + FULL FIELD STATES
+========================================= */
+.auth-heading h2 {
+  font-size: 34px;
+  line-height: 1.2;
+  letter-spacing: -1.4px;
+}
+
+.auth-heading p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.auth-kicker {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+}
+
+.auth-field > span {
+  font-size: 13px;
+}
+
+.auth-input-wrap {
+  height: 54px;
+  gap: 12px;
+  padding: 0 15px;
+  border: 1.5px solid #dbe3ef;
+  border-radius: 12px;
+  background: #fbfcfe;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.auth-input-wrap:hover {
+  border-color: #9bbcf0;
+  background: #ffffff;
+}
+
+.auth-input-wrap:focus-within {
+  border-color: #075bdb;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(7, 91, 219, 0.12);
+}
+
+.auth-input-wrap input,
+.auth-input-wrap select {
+  font-size: 14px;
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  background: transparent;
+}
+
+.auth-input-wrap input:focus,
+.auth-input-wrap select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.auth-input-wrap input:-webkit-autofill,
+.auth-input-wrap input:-webkit-autofill:hover,
+.auth-input-wrap input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #26334b;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+.auth-mode-switch button {
+  font-size: 13px;
+}
+
+.auth-submit {
+  min-height: 54px;
+  font-size: 14px;
+}
+
+.auth-bottom-note,
+.auth-bottom-note button {
+  font-size: 12px;
+}
+
+.auth-message-box {
+  font-size: 13px;
+}
+
+@media (max-width: 520px) {
+  .auth-heading h2 {
+    font-size: 30px;
+  }
+
+  .auth-field > span {
+    font-size: 12px;
+  }
+
+  .auth-input-wrap input,
+  .auth-input-wrap select {
+    font-size: 14px;
+  }
+}
