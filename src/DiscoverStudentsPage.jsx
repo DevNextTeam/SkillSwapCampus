@@ -35,6 +35,8 @@ export default function DiscoverStudentsPage({ currentUserId }) {
   const [notice, setNotice] = useState("");
   const [messageText, setMessageText] = useState("");
   const [conversation, setConversation] = useState([]);
+  const [exchangeSubmitting, setExchangeSubmitting] = useState({});
+  const [exchangeRequested, setExchangeRequested] = useState({});
 
   async function openStudent(student) {
     setSelected(student); setShowProfilePage(false); setDetailLoading(true); setNotice(""); setConversation([]);
@@ -46,6 +48,24 @@ export default function DiscoverStudentsPage({ currentUserId }) {
   async function friendAction(action) {
     try { const result = await apiRequest("friend_request.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, action }) }); setNotice(result.message); const refreshed = await apiRequest(`get_student_profile.php?id=${selected.id}`); setSelected(refreshed.student); }
     catch (err) { setNotice(err.message || "Unable to update friend request."); }
+  }
+
+  async function requestSkillExchange(skill) {
+    if (!skill?.id || skill.skill_type !== "offer" || Number(selected?.id) === Number(currentUserId)) return;
+    setExchangeSubmitting((current) => ({ ...current, [skill.id]: true }));
+    setNotice("");
+    try {
+      const result = await apiRequest("request_exchange.php", {
+        method: "POST",
+        body: JSON.stringify({ skill_id: skill.id }),
+      });
+      setExchangeRequested((current) => ({ ...current, [skill.id]: true }));
+      setNotice(result.message || "Exchange request sent successfully!");
+    } catch (err) {
+      setNotice(err.message || "Unable to send exchange request.");
+    } finally {
+      setExchangeSubmitting((current) => ({ ...current, [skill.id]: false }));
+    }
   }
 
   async function loadConversation() {
@@ -342,13 +362,23 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                 {selected.bio?.trim() && <div className="student-profile-about"><h3>About</h3><p>{selected.bio}</p></div>}
                 {selected.skills?.length > 0 && (
                   <section className="student-profile-skills-section">
-                    <h3>Skills</h3>
+                    <h3>Skills &amp; exchange</h3>
                     <div className="student-profile-skills-list">
                       {selected.skills.map((skill) => (
                         <article className="student-profile-skill" key={skill.id}>
                           <div><span className={skill.skill_type === "offer" ? "skill-type-offer" : "skill-type-learn"}>{skill.skill_type === "offer" ? "Offers" : "Wants to learn"}</span><h4>{skill.skill_name}</h4></div>
                           {skill.category && <span className="student-profile-skill-category">{skill.category}</span>}
                           {skill.description?.trim() && <p>{skill.description}</p>}
+                          {skill.skill_type === "offer" && Number(selected.id) !== Number(currentUserId) && (
+                            <button
+                              type="button"
+                              className="student-skill-exchange"
+                              disabled={exchangeSubmitting[skill.id] || exchangeRequested[skill.id]}
+                              onClick={() => requestSkillExchange(skill)}
+                            >
+                              {exchangeSubmitting[skill.id] ? "Sending..." : exchangeRequested[skill.id] ? "Request sent" : "Request skill exchange"}
+                            </button>
+                          )}
                         </article>
                       ))}
                     </div>
