@@ -427,3 +427,20 @@
 .student-profile-loading { display:flex; align-items:center; gap:10px; padding:30px 4px; color:#64748b; font-size:13px; }
 .profile-loading-dot { width:8px; height:8px; border-radius:50%; background:#2563a9; box-shadow:0 0 0 5px #eaf2fc; }
 @media(max-width:520px) { .student-profile-modal { padding:0 17px 20px; border-radius:17px; } .student-profile-cover { margin:0 -17px; height:92px; padding:16px; } .student-profile-header { gap:11px; padding:0 2px; } .student-profile-avatar { width:72px; height:72px; } .student-profile-header h2 { font-size:19px; } .student-profile-header p { font-size:11px; } .student-profile-actions { margin:16px 2px 22px; } }
+
+/* Minimal, professional student profile and directory actions */
+.student-profile-actions { justify-content:flex-end; align-items:center; margin:18px 8px 22px; }
+.student-profile-actions button { min-height:38px; padding:9px 15px; font-size:12px; }
+.student-profile-section-heading { display:none; }
+.student-profile-modal { padding-bottom:24px; }
+.student-chat { margin:18px 2px 0; padding-top:14px; }
+.student-chat::before { content:"PRIVATE MESSAGES"; display:block; margin:0 0 10px; color:#8190a3; font-size:9px; font-weight:800; letter-spacing:.14em; }
+.student-chat .student-profile-section-heading { display:none; }
+.student-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:17px; padding-top:12px; border-top:1px solid #edf1f5; color:#1759a6; font-size:12px; font-weight:750; }
+.student-card-footer span:last-child { font-size:17px; transition:transform .18s ease; }
+.student-card-clickable:hover .student-card-footer span:last-child { transform:translateX(4px); }
+.student-profile-actions .secondary { color:#334155; }
+@media(max-width:520px) {
+ .student-profile-actions { margin:16px 2px 20px; }
+ .student-profile-actions button { flex:1 1 auto; }
+}
