@@ -60,7 +60,11 @@ function SkillsPage({ user, mode = "browse", onModeChange }) {
     }
   }
 
-  useEffect(() => {\n    let active = true;\n    Promise.resolve().then(() => { if (active) loadSkills(); });\n    return () => { active = false; };\n  }, []);
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => { if (active) loadSkills(); });
+    return () => { active = false; };
+  }, []);
 
   function resetForm() {
     setForm({
