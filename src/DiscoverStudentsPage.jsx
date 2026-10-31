@@ -310,7 +310,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                     ) : selected.friend_status.status === "pending" ? (
                       <button type="button" onClick={() => friendAction("accept")}>Accept request</button>
                     ) : (
-                      <button type="button" className="secondary" onClick={() => friendAction("cancel")}>Friends</button>
+                      <span className="student-request-status">Friends</span>
                     )}
                     <button type="button" className="secondary" disabled={selected.friend_status?.status !== "accepted"} onClick={loadConversation}>Send message</button>
                   </div>
