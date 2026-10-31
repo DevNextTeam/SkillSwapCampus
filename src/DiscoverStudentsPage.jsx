@@ -208,7 +208,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
       ) : (
         <div className="discover-grid">
           {filteredStudents.map((student) => (
-            <article className="student-card student-card-clickable" key={student.id} role="button" tabIndex={0} onClick={() => openStudent(student)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openStudent(student); } }}>
+            <article className="student-card" key={student.id}>
               <div className="student-card-top">
                 <div className="student-avatar">{student.profile_photo ? <img src={`${API_BASE}/${student.profile_photo}`} alt="" /> : getInitials(student.full_name)}</div>
 
