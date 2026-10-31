@@ -2641,3 +2641,60 @@ body { background: var(--background); color: var(--text); }
   .hero-banner { border-radius: 15px; }
   .hero-copy h2 { font-size: 24px; }
 }
+
+
+/* =========================================
+   REFINED PRODUCT UI — LESS COPY, MORE SPACE
+========================================= */
+.page-content { max-width: 1600px; }
+.page-subtitle,
+.welcome-row .eyebrow,
+.discover-eyebrow,
+.discover-heading > div > p,
+.profile-form-heading > div > p {
+  display: none;
+}
+.welcome-row { margin-bottom: 28px; }
+.welcome-row h1 { letter-spacing: -0.045em; font-weight: 750; }
+.section-heading p { display: none; }
+.profile-page { max-width: 980px; gap: 18px; }
+.profile-intro {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  padding: 26px;
+}
+.profile-intro > div:nth-child(2) { flex: 1 1 auto; min-width: 0; }
+.profile-intro h2 {
+  display: block;
+  max-width: 100%;
+  margin: 0 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  letter-spacing: -0.035em;
+}
+.profile-intro p { margin: 0 0 9px; }
+.profile-status { font-size: 12px; }
+.profile-edit-button { flex: 0 0 auto; white-space: nowrap; }
+.profile-form { padding: 26px; }
+.profile-form-heading { margin-bottom: 22px; }
+.profile-form-heading h2 { letter-spacing: -0.03em; }
+.profile-field small { display: none; }
+.profile-field label { margin-bottom: 7px; }
+.profile-field input,
+.profile-field select,
+.profile-field textarea { min-height: 46px; }
+.profile-field textarea { min-height: 112px; }
+.profile-fields { gap: 18px; }
+@media (max-width: 680px) {
+  .profile-intro { gap: 12px; padding: 16px; }
+  .profile-intro h2 { font-size: 18px; }
+  .profile-edit-button { padding: 10px 11px; font-size: 12px; }
+}
+@media (max-width: 390px) {
+  .profile-intro { flex-wrap: wrap; }
+  .profile-intro > div:nth-child(2) { flex: 1 1 calc(100% - 76px); }
+  .profile-edit-button { margin-left: auto; }
+}
