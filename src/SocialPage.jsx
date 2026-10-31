@@ -18,7 +18,7 @@ export default function SocialPage({ currentUserId }) {
   const [sending,setSending]=useState(false);
   const refreshSocialData=useCallback(async()=>{try{setData(await apiRequest("social.php"));}catch(e){setNotice(e.message||"Unable to refresh connections.");}},[]);
   const refresh=useCallback(async()=>{setLoading(true);setError("");try{setData(await apiRequest("social.php"));}catch(e){setError(e.message||"Unable to load connections.");}finally{setLoading(false);}},[]);
-  useEffect(()=>{refresh();},[refresh]);
+  useEffect(()=>{let active=true;Promise.resolve().then(()=>{if(active)refresh();});return()=>{active=false;};},[refresh]);
   useEffect(()=>{
     if(!active)return;
     let mounted=true;
