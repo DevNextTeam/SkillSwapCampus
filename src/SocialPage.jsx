@@ -16,18 +16,19 @@ export default function SocialPage({ currentUserId }) {
   const [draft,setDraft]=useState("");
   const [notice,setNotice]=useState("");
   const [sending,setSending]=useState(false);
+  const refreshSocialData=useCallback(async()=>{try{setData(await apiRequest("social.php"));}catch(e){setNotice(e.message||"Unable to refresh connections.");}},[]);
   const refresh=useCallback(async()=>{setLoading(true);setError("");try{setData(await apiRequest("social.php"));}catch(e){setError(e.message||"Unable to load connections.");}finally{setLoading(false);}},[]);
   useEffect(()=>{refresh();},[refresh]);
   useEffect(()=>{
     if(!active)return;
     let mounted=true;
-    const poll=async()=>{try{const result=await apiRequest("messages.php?user_id="+active.user_id);if(mounted)setMessages(result.messages||[]);}catch(e){if(mounted)setNotice(e.message||"Unable to refresh messages.");}};
+    const poll=async()=>{try{const result=await apiRequest("messages.php?user_id="+active.user_id);if(mounted){setMessages(result.messages||[]);await refreshSocialData();}}catch(e){if(mounted)setNotice(e.message||"Unable to refresh messages.");}};
     const timer=setInterval(poll,10000);
     return()=>{mounted=false;clearInterval(timer);};
-  },[active]);
+  },[active,refreshSocialData]);
   async function requestAction(user_id,action){try{await apiRequest("friend_request.php",{method:"POST",body:JSON.stringify({user_id,action})});setNotice(action==="accept"?"Friend request accepted.":"Request declined.");await refresh();}catch(e){setNotice(e.message||"Unable to update request.");}}
-  async function openChat(friend){setActive(friend);setNotice("");try{const r=await apiRequest("messages.php?user_id="+friend.user_id);setMessages(r.messages||[]);}catch(e){setNotice(e.message||"Unable to load messages.");}}
-  async function send(event){event.preventDefault();if(!draft.trim()||!active||sending)return;setSending(true);try{await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:draft.trim()})});setDraft("");const r=await apiRequest("messages.php?user_id="+active.user_id);setMessages(r.messages||[]);await refresh();}catch(e){setNotice(e.message||"Unable to send message.");}finally{setSending(false);}}
+  async function openChat(friend){setActive(friend);setNotice("");try{const r=await apiRequest("messages.php?user_id="+friend.user_id);setMessages(r.messages||[]);await refreshSocialData();}catch(e){setNotice(e.message||"Unable to load messages.");}}
+  async function send(event){event.preventDefault();if(!draft.trim()||!active||sending)return;setSending(true);try{await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:draft.trim()})});setDraft("");const r=await apiRequest("messages.php?user_id="+active.user_id);setMessages(r.messages||[]);await refreshSocialData();}catch(e){setNotice(e.message||"Unable to send message.");}finally{setSending(false);}}
   return <div className="social-page">
     <div className="social-page-heading"><div><span className="social-kicker"><Users size={15}/> CAMPUS COMMUNITY</span><h2>Friends & messages</h2><p>Manage friend requests and continue your conversations.</p></div><button onClick={refresh} disabled={loading}><RefreshCw size={16}/> Refresh</button></div>
     {notice&&<p className="social-notice">{notice}</p>}{error&&<p className="social-error">{error}</p>}
