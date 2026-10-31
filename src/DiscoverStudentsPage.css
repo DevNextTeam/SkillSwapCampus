@@ -395,3 +395,35 @@
 .student-profile-header h2 { overflow-wrap:anywhere; line-height:1.25; }
 .student-profile-avatar { position:static; flex:0 0 72px; width:72px; height:72px; min-width:72px; border-radius:50%; overflow:hidden; }
 @media(max-width:520px) { .student-card-top { margin-bottom:62px; } .student-card-info h3 { font-size:15px; } }
+
+
+/* Premium student profile detail panel */
+.student-profile-modal { width:min(720px,100%); padding:0 28px 28px; border:1px solid #e5eaf1; border-radius:22px; background:#fff; }
+.student-profile-cover { height:112px; margin:0 -28px 0; padding:20px 26px; display:flex; align-items:flex-start; justify-content:space-between; color:#dce9ff; background:linear-gradient(115deg,#102b50 0%,#1558a6 58%,#6d91c7 100%); border-radius:21px 21px 0 0; font-size:10px; font-weight:800; letter-spacing:.16em; }
+.profile-cover-mark { width:38px; height:38px; display:grid; place-items:center; border:1px solid #ffffff55; border-radius:12px; background:#ffffff18; }
+.student-profile-header { position:relative; align-items:flex-end; gap:17px; margin-top:-38px; padding:0 8px; }
+.student-profile-avatar { width:88px; height:88px; border:5px solid #fff; background:#e8f0fb; box-shadow:0 5px 18px #102b5020; font-size:22px; }
+.student-profile-identity { min-width:0; padding:0 0 5px; }
+.profile-member-pill { display:inline-flex; margin-bottom:5px; color:#2862a8; font-size:9px; font-weight:850; letter-spacing:.12em; }
+.student-profile-header h2 { color:#14243a; font-size:24px; letter-spacing:-.045em; }
+.student-profile-header p { font-size:12px; overflow-wrap:anywhere; }
+.student-profile-bio { margin:18px 8px; padding:13px 15px; border:1px solid #e9eef5; border-radius:12px; background:#f8fafc; font-size:13px; }
+.student-profile-actions { margin:18px 8px 25px; }
+.student-profile-actions button,.student-profile-skills button,.student-chat form button { border-radius:9px; background:#145bb0; box-shadow:0 4px 10px #145bb01c; }
+.student-profile-actions .secondary { background:#eef2f7; box-shadow:none; }
+.student-profile-section-heading { display:flex; align-items:center; justify-content:space-between; margin:22px 2px 12px; color:#4776b4; }
+.student-profile-section-heading span { color:#7c8da3; font-size:9px; font-weight:850; letter-spacing:.14em; }
+.student-profile-section-heading h3 { margin:3px 0 0; color:#172b45; font-size:17px; letter-spacing:-.025em; }
+.student-profile-skills { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+.student-profile-skills > div { padding:16px; border-color:#e5ebf3; border-radius:14px; background:linear-gradient(145deg,#fff,#f9fbfe); }
+.student-profile-skills strong { color:#1d3049; font-size:14px; }
+.student-profile-skills span { color:#2862a8; font-weight:700; }
+.student-profile-skills p { line-height:1.5; }
+.student-profile-notice { margin:0 8px 16px; }
+.student-chat { margin:22px 2px 0; padding-top:4px; border-top:1px solid #e8edf4; }
+.student-chat-history { padding:12px; border:1px solid #e8edf4; border-radius:13px; background:#f8fafc; }
+.student-chat form { padding-top:4px; }
+.student-chat input { border-radius:10px; }
+.student-profile-loading { display:flex; align-items:center; gap:10px; padding:30px 4px; color:#64748b; font-size:13px; }
+.profile-loading-dot { width:8px; height:8px; border-radius:50%; background:#2563a9; box-shadow:0 0 0 5px #eaf2fc; }
+@media(max-width:520px) { .student-profile-modal { padding:0 17px 20px; border-radius:17px; } .student-profile-cover { margin:0 -17px; height:92px; padding:16px; } .student-profile-header { gap:11px; padding:0 2px; } .student-profile-avatar { width:72px; height:72px; } .student-profile-header h2 { font-size:19px; } .student-profile-header p { font-size:11px; } .student-profile-actions { margin:16px 2px 22px; } }
