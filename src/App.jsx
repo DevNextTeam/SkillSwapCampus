@@ -20,6 +20,7 @@ import {
   LogOut,
   Save,
   Pencil,
+  Users,
 } from "lucide-react";
 
 import Auth from "./Auth";
@@ -27,6 +28,7 @@ import SkillsPage from "./SkillsPage";
 import ExchangesPage from "./ExchangesPage";
 import SchedulePage from "./SchedulePage";
 import DiscoverStudentsPage from "./DiscoverStudentsPage";
+import SocialPage from "./SocialPage";
 import { apiRequest } from "./api";
 import "./App.css";
 
@@ -35,6 +37,7 @@ const SPLASH_DURATION = 5000;
 const navigation = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "Discover Students", icon: Search },
+  { label: "Friends & Messages", icon: Users },
   { label: "Explore Skills", icon: Compass },
   { label: "My Exchanges", icon: ArrowUpRight },
   { label: "My Schedule", icon: CalendarDays },
@@ -516,7 +519,10 @@ function App() {
           </div>
 
           {/* DISCOVER STUDENTS PAGE */}
-          {activePage === "Discover Students" ? (
+          {activePage === "Friends & Messages" ? (
+            <SocialPage currentUserId={user.id} />
+
+          ) : activePage === "Discover Students" ? (
             <DiscoverStudentsPage currentUserId={user.id} />
 
           ) : activePage === "My Profile" ? (
