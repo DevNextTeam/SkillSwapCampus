@@ -14,7 +14,6 @@ import {
   Sparkles,
   Code2,
   Palette,
-  Languages,
   Menu,
   X,
   LogOut,
@@ -174,7 +173,6 @@ function ProfilePage({ user, onProfileUpdated }) {
 function App() {
   const [activePage, setActivePage] = useState("Dashboard");
   const [skillMode, setSkillMode] = useState("browse");
-  const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
@@ -284,7 +282,6 @@ function App() {
       setActivePage("Dashboard");
       setSkillMode("browse");
       setMenuOpen(false);
-      setSearch("");
 
     } catch (error) {
       alert(error.message || "Unable to log out. Please try again.");
