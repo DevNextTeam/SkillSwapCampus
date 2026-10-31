@@ -279,25 +279,63 @@ export default function DiscoverStudentsPage({ currentUserId }) {
           ))}
         </div>
       )}
-      {selected && <div className="student-profile-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelected(null); }}>
-        <section className="student-profile-modal" role="dialog" aria-modal="true" aria-label="Student profile">
-          <button className="student-profile-close" onClick={() => setSelected(null)} aria-label="Close profile">×</button>
-          {detailLoading ? <div className="student-profile-loading"><span className="profile-loading-dot" />Loading student profile...</div> : <>
-            <div className="student-profile-cover"><span>SKILLSWAP CAMPUS</span><span className="profile-cover-mark"><Sparkles size={20}/></span></div>
-            <div className="student-profile-header"><div className="student-avatar student-profile-avatar">{selected.profile_photo ? <img src={`${API_BASE}/${selected.profile_photo}`} alt="" /> : getInitials(selected.full_name)}</div><div className="student-profile-identity"><span className="profile-member-pill">CAMPUS MEMBER</span><h2>{selected.full_name}</h2><p>{[selected.university,selected.course,selected.year_level].filter(Boolean).join(" · ")}</p></div></div>
-            {selected.bio && <p className="student-profile-bio">{selected.bio}</p>}
-            <div className="student-profile-actions">
-              {!selected.friend_status ? <button type="button" onClick={() => friendAction("send")}>Add friend</button> :
-                selected.friend_status.status === "accepted" ? <button type="button" onClick={loadConversation}>Send message</button> :
-                selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? <span>Request sent · Pending</span> :
-                selected.friend_status.status === "pending" ? <><button type="button" onClick={() => friendAction("accept")}>Accept request</button><button type="button" className="secondary" onClick={() => friendAction("decline")}>Decline</button></> :
-                <button type="button" onClick={() => friendAction("send")}>Add friend</button>}
-            </div>
-            {notice && <p className="student-profile-notice">{notice}</p>}
-            {selected.friend_status?.status === "accepted" && <div className="student-chat"><div className="student-profile-section-heading"><div><span>PRIVATE CONVERSATION</span><h3>Messages</h3></div></div><div className="student-chat-history">{conversation.map(item => <p className={Number(item.sender_id)===Number(currentUserId)?"sent":"received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>)}</div><form onSubmit={sendMessage}><input value={messageText} onChange={event=>setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000}/><button type="submit">Send</button></form></div>}
-          </>}
+      {selected && (
+        <section className="student-profile-page">
+          <button className="student-profile-back" type="button" onClick={() => { setSelected(null); setConversation([]); setNotice(""); }}>
+            <span aria-hidden="true">←</span> Back to students
+          </button>
+          {detailLoading ? (
+            <div className="student-profile-loading"><span className="profile-loading-dot" />Loading student profile...</div>
+          ) : (
+            <article className="student-profile-card">
+              <div className="student-profile-cover">
+                <span>SKILLSWAP CAMPUS</span>
+                <span className="profile-cover-mark"><Sparkles size={20} /></span>
+              </div>
+              <div className="student-profile-main">
+                <div className="student-profile-header">
+                  <div className="student-avatar student-profile-avatar">
+                    {selected.profile_photo ? <img src={`${API_BASE}/${selected.profile_photo}`} alt={selected.full_name} /> : getInitials(selected.full_name)}
+                  </div>
+                  <div className="student-profile-identity">
+                    <span className="profile-member-pill">CAMPUS MEMBER</span>
+                    <h2>{selected.full_name}</h2>
+                    <p>{[selected.university, selected.course, selected.year_level].filter(Boolean).join(" · ") || "Student member"}</p>
+                  </div>
+                  <div className="student-profile-actions">
+                    {!selected.friend_status || selected.friend_status.status === "declined" ? (
+                      <button type="button" onClick={() => friendAction("send")}>Add friend</button>
+                    ) : selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? (
+                      <span className="student-request-status">Request sent · Pending</span>
+                    ) : selected.friend_status.status === "pending" ? (
+                      <button type="button" onClick={() => friendAction("accept")}>Accept request</button>
+                    ) : (
+                      <button type="button" className="secondary" onClick={() => friendAction("cancel")}>Friends</button>
+                    )}
+                    <button type="button" className="secondary" disabled={selected.friend_status?.status !== "accepted"} onClick={loadConversation}>Send message</button>
+                  </div>
+                </div>
+                {selected.bio?.trim() && <div className="student-profile-about"><h3>About</h3><p>{selected.bio}</p></div>}
+                {notice && <p className="student-profile-notice">{notice}</p>}
+                {selected.friend_status?.status === "accepted" && (
+                  <div className="student-chat">
+                    <div className="student-chat-title">PRIVATE MESSAGES</div>
+                    <div className="student-chat-history">
+                      {conversation.length ? conversation.map(item => (
+                        <p className={Number(item.sender_id) === Number(currentUserId) ? "sent" : "received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>
+                      )) : <p className="student-chat-empty">Your conversation with {selected.full_name} will appear here.</p>}
+                    </div>
+                    <form onSubmit={sendMessage}>
+                      <input value={messageText} onChange={event => setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000} />
+                      <button type="submit">Send</button>
+                    </form>
+                  </div>
+                )}
+              </div>
+            </article>
+          )}
         </section>
-      </div>}
+      )}
     </div>
   );
 }
