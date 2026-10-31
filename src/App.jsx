@@ -99,7 +99,17 @@ function ProfilePage({ user, onProfileUpdated }) {
     }
   }
 
-  async function handlePhotoChange(event) {\n    const photo = event.target.files?.[0];\n    if (!photo) return;\n    if (photo.size > 3 * 1024 * 1024) { setMessage("Photo must be 3 MB or smaller."); setMessageType("error"); return; }\n    const body = new FormData(); body.append("photo", photo); setPhotoUploading(true);\n    try { const result = await apiRequest("upload_profile_photo.php", { method: "POST", body }); onProfileUpdated(result.user); setMessage("Profile photo updated."); setMessageType("success"); }\n    catch (error) { setMessage(error.message || "Unable to upload photo."); setMessageType("error"); }\n    finally { setPhotoUploading(false); event.target.value = ""; }\n  }\n\n  const initials = form.full_name.trim().split(/\\s+/).filter(Boolean)
+  async function handlePhotoChange(event) {
+    const photo = event.target.files?.[0];
+    if (!photo) return;
+    if (photo.size > 3 * 1024 * 1024) { setMessage("Photo must be 3 MB or smaller."); setMessageType("error"); return; }
+    const body = new FormData(); body.append("photo", photo); setPhotoUploading(true);
+    try { const result = await apiRequest("upload_profile_photo.php", { method: "POST", body }); onProfileUpdated(result.user); setMessage("Profile photo updated."); setMessageType("success"); }
+    catch (error) { setMessage(error.message || "Unable to upload photo."); setMessageType("error"); }
+    finally { setPhotoUploading(false); event.target.value = ""; }
+  }
+
+  const initials = form.full_name.trim().split(/\\s+/).filter(Boolean)
     .map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST";
 
   return (
