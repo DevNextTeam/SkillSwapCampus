@@ -13,7 +13,12 @@ if (empty($_SESSION["user_id"])) {
     exit;
 }
 
-$data = json_decode(file_get_contents("php://input"), true) ?: [];
+$data = json_decode(file_get_contents("php://input"), true);
+if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid friend request data."]);
+    exit;
+}
 $me = (int) $_SESSION["user_id"];
 $target = filter_var($data["user_id"] ?? null, FILTER_VALIDATE_INT);
 $action = $data["action"] ?? "send";
