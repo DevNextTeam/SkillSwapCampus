@@ -300,10 +300,28 @@ function App() {
   const [skillMode, setSkillMode] = useState("browse");
   const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [requested, setRequested] = useState([]);
+  const [dashboardSkills, setDashboardSkills] = useState([]);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
 
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    async function loadDashboardSkills() {
+      try {
+        const result = await apiRequest("get_skills.php");
+        if (active) setDashboardSkills(result.skills || []);
+      } catch (error) {
+        console.error("Unable to load dashboard skills:", error);
+        if (active) setDashboardSkills([]);
+      } finally {
+        if (active) setDashboardLoading(false);
+      }
+    }
+    loadDashboardSkills();
+    return () => { active = false; };
+  }, []);
 
   // CLEAR PREVIOUS SESSION ON EVERY FRESH APP OPEN.
   // Keep the icon-only loading screen visible for 5 seconds.
@@ -391,7 +409,7 @@ function App() {
       setSkillMode("browse");
       setMenuOpen(false);
       setSearch("");
-      setRequested([]);
+
     } catch (error) {
       alert(error.message || "Unable to log out. Please try again.");
     }
@@ -712,142 +730,50 @@ function App() {
                 </div>
               </section>
 
-              {/* STATISTICS */}
-              <section className="stats-grid">
-                <article className="stat-card">
-                  <div className="stat-icon stat-blue">
-                    <Compass size={20} />
-                  </div>
-
-                  <span>Skills to explore</span>
-                  <strong>24</strong>
-                  <small>Discover your next interest</small>
-                </article>
-
-                <article className="stat-card">
-                  <div className="stat-icon stat-purple">
-                    <CalendarDays size={20} />
-                  </div>
-
-                  <span>Upcoming sessions</span>
-                  <strong>03</strong>
-                  <small>Keep learning on schedule</small>
-                </article>
-
-                <article className="stat-card">
-                  <div className="stat-icon stat-orange">
-                    <Sparkles size={20} />
-                  </div>
-
-                  <span>Learning credits</span>
-                  <strong>120</strong>
-                  <small>Earn through skill exchanges</small>
-                </article>
-              </section>
-
-              {/* RECOMMENDED SKILLS */}
+              {/* LATEST COMMUNITY SKILLS */}
               <section className="skills-section">
                 <div className="section-heading">
                   <div>
-                    <h2>Skills you might love</h2>
-
-                    <p>
-                      Find a student who can teach you something new.
-                    </p>
+                    <h2>Recently shared skills</h2>
+                    <p>The latest skill posts from your campus community.</p>
                   </div>
-
-                  <button
-                    className="text-button"
-                    onClick={() => {
-                      setSkillMode("browse");
-                      setActivePage("Explore Skills");
-                    }}
-                  >
-                    View all <ArrowUpRight size={16} />
+                  <button className="text-button" onClick={() => { setSkillMode("browse"); setActivePage("Explore Skills"); }}>
+                    Explore all <ArrowUpRight size={16} />
                   </button>
                 </div>
-
-                <div className="search-bar">
-                  <Search size={19} />
-
-                  <input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search skills, categories, or students..."
-                    aria-label="Search skills"
-                  />
-                </div>
-
-                <div className="skills-grid">
-                  {filteredSkills.map((skill) => {
-                    const Icon = skill.icon;
-                    const isRequested = requested.includes(skill.title);
-
-                    return (
-                      <article
-                        className="skill-card"
-                        key={skill.title}
-                      >
-                        <div className={`skill-art skill-${skill.color}`}>
-                          <div className="skill-art-icon">
-                            <Icon size={29} />
-                          </div>
-
-                          <span>{skill.category}</span>
-                        </div>
-
-                        <div className="skill-card-body">
-                          <span className="skill-level">
-                            {skill.level}
+                {dashboardLoading ? (
+                  <div className="skills-empty"><p>Loading recent skill posts...</p></div>
+                ) : dashboardSkills.length === 0 ? (
+                  <div className="skills-empty">
+                    <h3>No skill posts yet</h3>
+                    <p>New posts from students will appear here when they are shared.</p>
+                    <button className="primary-button" onClick={() => { setSkillMode("browse"); setActivePage("Explore Skills"); }}>Explore Skills</button>
+                  </div>
+                ) : (
+                  <div className="database-skills-grid">
+                    {dashboardSkills.slice(0, 6).map((skill) => (
+                      <article className="database-skill-card" key={skill.id}>
+                        <div className="database-skill-top">
+                          <span className={`database-skill-type ${skill.skill_type === "offer" ? "type-offer" : "type-learn"}`}>
+                            {skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}
                           </span>
-
-                          <h3>{skill.title}</h3>
-
-                          <div className="teacher-row">
-                            <div className={`avatar avatar-${skill.color}`}>
-                              {skill.initials}
-                            </div>
-
-                            <span>{skill.teacher}</span>
+                        </div>
+                        <h3>{skill.skill_name}</h3>
+                        <span className="database-skill-category">{skill.category || "General"}</span>
+                        <p className="database-skill-description">{skill.description || "No description provided."}</p>
+                        <div className="database-skill-student">
+                          <div className="database-skill-avatar">
+                            {(skill.full_name || "S").trim().split(/\\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
                           </div>
-
-                          <button
-                            className={
-                              isRequested
-                                ? "requested-button"
-                                : "request-button"
-                            }
-                            onClick={() =>
-                              setRequested((previous) =>
-                                isRequested
-                                  ? previous.filter(
-                                      (title) => title !== skill.title
-                                    )
-                                  : [...previous, skill.title]
-                              )
-                            }
-                          >
-                            {isRequested
-                              ? "Request saved ✓"
-                              : "Request exchange"}
-
-                            {!isRequested && <ArrowUpRight size={16} />}
-                          </button>
+                          <div>
+                            <strong>{skill.full_name || "Campus student"}</strong>
+                            <span>{skill.university || "Campus member"}</span>
+                          </div>
                         </div>
                       </article>
-                    );
-                  })}
-
-                  {filteredSkills.length === 0 && (
-                    <div className="empty-state">
-                      <Search size={26} />
-
-                      <h3>No matching skills found</h3>
-
-                      <p>Try a different keyword.</p>
-                    </div>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               {/* FOOTER */}
