@@ -23,7 +23,7 @@ function getInitials(name = "") {
     .toUpperCase() || "ST";
 }
 
-export default function DiscoverStudentsPage() {
+export default function DiscoverStudentsPage({ currentUserId }) {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
