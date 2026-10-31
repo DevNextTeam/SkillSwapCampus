@@ -25,3 +25,15 @@ jobs:
         run: npm run build
       - name: Check code style
         run: npm run lint
+
+  backend-php-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Check PHP syntax
+        run: find backend -type f -name '*.php' -print0 | xargs -0 -n1 php -l
