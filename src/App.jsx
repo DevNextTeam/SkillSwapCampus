@@ -222,51 +222,34 @@ function App() {
     return () => window.clearInterval(timer);
   }, [user?.id]);
 
-  // Play a short, soft loading melody for the duration of the startup screen.
-  useEffect(() => {
-    if (!authLoading || !showStartupSplash) return undefined;
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return undefined;
-    let context;
-    let stopTimer;
-    let stopped = false;
-    try {
-      context = new AudioContextClass();
-      const play = async () => {
+    // Play downloaded startup sound when the splash screen appears.
+    useEffect(() => {
+      if (!authLoading || !showStartupSplash) return;
+
+      const audio = new Audio("/sounds/loading-sound.mp3");
+      audio.volume = 0.75;
+      audio.preload = "auto";
+
+      let cancelled = false;
+
+      const playSound = async () => {
         try {
-          await context.resume();
-          if (stopped) return;
-          const startAt = context.currentTime + 0.08;
-          const notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
-          notes.forEach((frequency, index) => {
-            const oscillator = context.createOscillator();
-            const gain = context.createGain();
-            const at = startAt + index * 0.42;
-            oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(frequency, at);
-            gain.gain.setValueAtTime(0.0001, at);
-            gain.gain.linearRampToValueAtTime(0.025, at + 0.07);
-            gain.gain.setTargetAtTime(0.0001, at + 0.22, 0.07);
-            oscillator.connect(gain);
-            gain.connect(context.destination);
-            oscillator.start(at);
-            oscillator.stop(at + 0.4);
-          });
-          stopTimer = window.setTimeout(() => context.close().catch(() => {}), 3700);
-        } catch {
-          // Some browsers block sound until the site has previously been interacted with.
+          await audio.play();
+        } catch (error) {
+          console.warn("Browser blocked startup audio:", error);
         }
       };
-      play();
-    } catch {
-      // Audio is optional; loading must continue if audio is unavailable.
-    }
-    return () => {
-      stopped = true;
-      if (stopTimer) window.clearTimeout(stopTimer);
-      if (context && context.state !== "closed") context.close().catch(() => {});
-    };
-  }, [authLoading, showStartupSplash]);
+
+      playSound();
+
+      return () => {
+        cancelled = true;
+        audio.pause();
+        audio.currentTime = 0;
+        audio.removeAttribute("src");
+        audio.load();
+      };
+    }, [authLoading, showStartupSplash]);
 
   // Restore an existing login session instead of logging students out on refresh.
   useEffect(() => {
