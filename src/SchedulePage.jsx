@@ -127,7 +127,7 @@ function SchedulePage({ user }) {
       return;
     }
 
-    if (new Date(form.scheduled_at).getTime() <= Date.now()) {
+    if (new Date(form.scheduled_at).getTime() <= new Date().getTime()) {
       setMessage("Please choose a future date and time.");
       setMessageType("error");
       return;
