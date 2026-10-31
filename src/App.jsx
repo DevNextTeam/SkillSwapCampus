@@ -7,6 +7,7 @@ import {
   Compass,
   CalendarDays,
   UserRound,
+  BookOpen,
   Bell,
   Plus,
   ArrowUpRight,
