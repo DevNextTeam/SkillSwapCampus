@@ -44,56 +44,51 @@ const navigation = [
 function ProfilePage({ user, onProfileUpdated }) {
   const [form, setForm] = useState({
     full_name: user.full_name || "",
-    email: user.email || "",
     university: user.university || "",
     course: user.course || "",
     year_level: user.year_level || "",
     bio: user.bio || "",
   });
-
-  const [saving, setSaving] = useState(false);
+  const [skills, setSkills] = useState([]);
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
+  useEffect(() => {
+    let active = true;
+    apiRequest("get_skills.php")
+      .then((result) => {
+        if (active) {
+          const mine = (result.skills || []).filter(
+            (skill) => Number(skill.user_id) === Number(user.id)
+          );
+          setSkills(mine);
+        }
+      })
+      .catch(() => { if (active) setSkills([]); });
+    return () => { active = false; };
+  }, [user.id]);
+
   function handleChange(event) {
     const { name, value } = event.target;
-
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+    setForm((previous) => ({ ...previous, [name]: value }));
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-
     setSaving(true);
     setMessage("");
-    setMessageType("");
-
     try {
       const result = await apiRequest("update_profile.php", {
         method: "POST",
-        body: JSON.stringify({
-          full_name: form.full_name,
-          university: form.university,
-          course: form.course,
-          year_level: form.year_level,
-          bio: form.bio,
-        }),
+        body: JSON.stringify(form),
       });
-
       onProfileUpdated(result.user);
-
-      setForm((previous) => ({
-        ...previous,
-        ...result.user,
-      }));
-
-      setMessage("Your profile has been updated successfully!");
-      setMessageType("success");
+      setForm((previous) => ({ ...previous, ...result.user }));
       setEditing(false);
+      setMessage("Profile saved.");
+      setMessageType("success");
     } catch (error) {
       setMessage(error.message || "Unable to save your profile.");
       setMessageType("error");
@@ -102,163 +97,60 @@ function ProfilePage({ user, onProfileUpdated }) {
     }
   }
 
-  const initials = form.full_name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = form.full_name.trim().split(/\\s+/).filter(Boolean)
+    .map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST";
 
   return (
     <div className="profile-page">
-      <div className="profile-intro">
-        <div className="profile-large-avatar">
-          {initials || "ST"}
-        </div>
-
-        <div>
-          <h2>{form.full_name || "Your Name"}</h2>
-          <p>{form.university || "Add your university"}</p>
-
-          <span className="profile-status">
-            <span className="status-dot" />
-            Campus Member
-          </span>
-        </div>
-        <button type="button" className="primary-button profile-edit-button" onClick={() => setEditing(true)} disabled={editing}>
-          <Pencil size={16} /> Edit Profile
-        </button>
-      </div>
-
-      <form className="profile-form" onSubmit={handleSubmit}>
-        <div className="profile-form-heading">
-          <div>
-            <h2>Personal Information</h2>
-            <p>Keep your student profile updated.</p>
-          </div>
-
-          <UserRound size={23} />
-        </div>
-
-        <div className="profile-fields">
-          <div className="profile-field">
-            <label htmlFor="full_name">Full Name</label>
-
-            <input
-              disabled={!editing}
-              id="full_name"
-              name="full_name"
-              type="text"
-              value={form.full_name}
-              onChange={handleChange}
-              maxLength={100}
-              required
-            />
-          </div>
-
-          <div className="profile-field">
-            <label htmlFor="email">Email Address</label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={form.email}
-              disabled
-            />
-
-            <small>Your email address cannot be changed here.</small>
-          </div>
-
-          <div className="profile-field">
-            <label htmlFor="university">University</label>
-
-            <input
-              disabled={!editing}
-              id="university"
-              name="university"
-              type="text"
-              placeholder="Enter your university"
-              value={form.university}
-              onChange={handleChange}
-              maxLength={150}
-            />
-          </div>
-
-          <div className="profile-field">
-            <label htmlFor="course">Course / Program</label>
-
-            <input
-              disabled={!editing}
-              id="course"
-              name="course"
-              type="text"
-              placeholder="e.g. Bachelor of Science in IT"
-              value={form.course}
-              onChange={handleChange}
-              maxLength={100}
-            />
-          </div>
-
-          <div className="profile-field">
-            <label htmlFor="year_level">Year Level</label>
-
-            <select
-              disabled={!editing}
-              id="year_level"
-              name="year_level"
-              value={form.year_level}
-              onChange={handleChange}
-            >
-              <option value="">Select your year level</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
-              <option value="5th Year">5th Year</option>
-              <option value="Graduate Student">Graduate Student</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div className="profile-field profile-field-full">
-            <label htmlFor="bio">About Me</label>
-
-            <textarea
-              disabled={!editing}
-              id="bio"
-              name="bio"
-              placeholder="Tell other students about yourself, your interests, and the skills you want to learn..."
-              value={form.bio}
-              onChange={handleChange}
-              maxLength={2000}
-              rows={5}
-            />
-
-            <small>{form.bio.length}/2000 characters</small>
+      <form className="profile-intro profile-modern-card" onSubmit={handleSubmit}>
+        <div className="profile-large-avatar">{initials}</div>
+        <div className="profile-identity">
+          <h2 title={form.full_name}>{form.full_name || "Your Name"}</h2>
+          {editing ? (
+            <textarea className="profile-bio-editor" name="bio" value={form.bio}
+              onChange={handleChange} placeholder="Write a short bio..." maxLength={500} rows={2} />
+          ) : (
+            <p className="profile-bio">{form.bio || "Add a short bio to introduce yourself to the campus community."}</p>
+          )}
+          <div className="profile-meta">
+            {form.university && <span>{form.university}</span>}
+            {form.course && <span>{form.course}</span>}
+            {form.year_level && <span>{form.year_level}</span>}
           </div>
         </div>
-
-        {message && (
-          <div className={`profile-message ${messageType}`}>
-            {message}
-          </div>
-        )}
-
-        {editing && (
+        {!editing ? (
+          <button type="button" className="primary-button profile-edit-button" onClick={() => setEditing(true)}>
+            <Pencil size={16} /> Edit profile
+          </button>
+        ) : (
           <div className="profile-form-actions">
-            <button type="button" className="skill-cancel-button" onClick={() => setEditing(false)} disabled={saving}>
-              Cancel
-            </button>
-            <button type="submit" className="primary-button profile-save-button" disabled={saving}>
-              <Save size={17} />
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
+            <button type="button" className="skill-cancel-button" onClick={() => {
+              setForm({ full_name: user.full_name || "", university: user.university || "", course: user.course || "", year_level: user.year_level || "", bio: user.bio || "" });
+              setEditing(false);
+            }} disabled={saving}>Cancel</button>
+            <button type="submit" className="primary-button" disabled={saving}><Save size={16} />{saving ? "Saving..." : "Save"}</button>
           </div>
         )}
+        {editing && <div className="profile-edit-fields">
+          <label>Full name<input name="full_name" value={form.full_name} onChange={handleChange} required maxLength={100} /></label>
+          <label>University<input name="university" value={form.university} onChange={handleChange} maxLength={150} /></label>
+          <label>Course / program<input name="course" value={form.course} onChange={handleChange} maxLength={100} /></label>
+          <label>Year level<select name="year_level" value={form.year_level} onChange={handleChange}>
+            <option value="">Select year</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option><option>Graduate Student</option><option>Other</option>
+          </select></label>
+        </div>}
+        {message && <div className={`profile-message ${messageType}`}>{message}</div>}
       </form>
+
+      <section className="profile-skills-card">
+        <div className="profile-skills-heading"><div><h2>Skills</h2><p>Your shared knowledge and learning goals</p></div><span>{skills.length}</span></div>
+        {skills.length ? <div className="profile-skills-grid">{skills.map((skill) => (
+          <article className="profile-skill-item" key={skill.id}>
+            <span className={skill.skill_type === "offer" ? "profile-skill-kind offer" : "profile-skill-kind learn"}>{skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}</span>
+            <h3>{skill.skill_name}</h3><p>{skill.category || "General"}</p>
+          </article>
+        ))}</div> : <div className="profile-skills-empty"><div className="profile-empty-mark"><BookOpen size={22} /></div><h3>No skills added yet</h3><p>Share a skill or add something you want to learn.</p></div>}
+      </section>
     </div>
   );
 }
