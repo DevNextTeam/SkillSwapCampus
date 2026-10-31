@@ -297,3 +297,26 @@
     padding: 17px;
   }
 }
+
+
+/* Cleaner student directory */
+.discover-page { gap: 20px; }
+.discover-heading h2 { color: #111827; font-size: 24px; letter-spacing: -.04em; }
+.discover-results-heading p { display: none; }
+.discover-results-heading h3 { font-size: 15px; font-weight: 700; }
+.discover-grid { gap: 14px; }
+.student-card { border-color: #e1e6ef; border-radius: 16px; box-shadow: 0 5px 18px rgba(16,24,39,.045); }
+.student-card-info h3 { color: #172033; font-size: 16px; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.student-bio {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 10px 0 14px;
+}
+.student-skills-group { margin-top: 12px; }
+.student-skills-group h4 { color: #34445f; }
+.student-skill-tags span { background: #edf3ff; color: #174d9c; border-radius: 20px; }
+.student-skills-group.wanted .student-skill-tags span { background: #f1f3f6; color: #536174; }
+.discover-filters button.active { background: #075bdb; border-color: #075bdb; }
+.discover-error button { background: #075bdb; }
