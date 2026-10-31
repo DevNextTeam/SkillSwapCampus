@@ -1,4 +1,3 @@
-
 <?php
 
 require_once "config.php";
@@ -6,31 +5,30 @@ require_once "db.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
-    echo json_encode([
-        "success" => false,
-        "message" => "Only POST requests are allowed."
-    ]);
+    echo json_encode(["success" => false, "message" => "Only POST requests are allowed."]);
     exit;
 }
 
 if (empty($_SESSION["user_id"])) {
     http_response_code(401);
-    echo json_encode([
-        "success" => false,
-        "message" => "Please log in first."
-    ]);
+    echo json_encode(["success" => false, "message" => "Please log in first."]);
     exit;
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
-
 if (!is_array($data)) {
     http_response_code(400);
-    echo json_encode([
-        "success" => false,
-        "message" => "Invalid request data."
-    ]);
+    echo json_encode(["success" => false, "message" => "Invalid request data."]);
     exit;
+}
+
+$fields = ["full_name", "university", "course", "year_level", "bio"];
+foreach ($fields as $field) {
+    if (isset($data[$field]) && !is_string($data[$field])) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Profile fields must contain text only."]);
+        exit;
+    }
 }
 
 $fullName = trim($data["full_name"] ?? "");
@@ -41,69 +39,49 @@ $bio = trim($data["bio"] ?? "");
 
 if ($fullName === "") {
     http_response_code(400);
-    echo json_encode([
-        "success" => false,
-        "message" => "Full name is required."
-    ]);
+    echo json_encode(["success" => false, "message" => "Full name is required."]);
     exit;
 }
 
+$length = function ($value) {
+    return function_exists("mb_strlen") ? mb_strlen($value, "UTF-8") : strlen($value);
+};
+
 if (
-    strlen($fullName) > 100 ||
-    strlen($university) > 150 ||
-    strlen($course) > 100 ||
-    strlen($yearLevel) > 30 ||
-    strlen($bio) > 8000
+    $length($fullName) > 100 ||
+    $length($university) > 150 ||
+    $length($course) > 100 ||
+    $length($yearLevel) > 30 ||
+    $length($bio) > 500
 ) {
     http_response_code(400);
-    echo json_encode([
-        "success" => false,
-        "message" => "One or more fields are too long."
-    ]);
+    echo json_encode(["success" => false, "message" => "One or more fields are too long."]);
     exit;
 }
 
 try {
     $stmt = $pdo->prepare(
         "UPDATE users
-         SET full_name = ?,
-             university = ?,
-             course = ?,
-             year_level = ?,
-             bio = ?
+         SET full_name = ?, university = ?, course = ?, year_level = ?, bio = ?
          WHERE id = ?"
     );
-
-    $stmt->execute([
-        $fullName,
-        $university,
-        $course,
-        $yearLevel,
-        $bio,
-        $_SESSION["user_id"]
-    ]);
+    $stmt->execute([$fullName, $university, $course, $yearLevel, $bio, $_SESSION["user_id"]]);
 
     $stmt = $pdo->prepare(
-        "SELECT id, full_name, email, university, course,
-                year_level, bio, profile_photo
-         FROM users
-         WHERE id = ?
-         LIMIT 1"
+        "SELECT id, full_name, email, university, course, year_level, bio, profile_photo
+         FROM users WHERE id = ? LIMIT 1"
     );
-
     $stmt->execute([$_SESSION["user_id"]]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    echo json_encode([
-        "success" => true,
-        "message" => "Profile updated successfully!",
-        "user" => $user
-    ]);
+    if (!$user) {
+        http_response_code(404);
+        echo json_encode(["success" => false, "message" => "Student account not found."]);
+        exit;
+    }
 
+    echo json_encode(["success" => true, "message" => "Profile updated successfully!", "user" => $user]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "message" => "Unable to update your profile."
-    ]);
+    echo json_encode(["success" => false, "message" => "Unable to update your profile."]);
 }
