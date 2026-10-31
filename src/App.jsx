@@ -197,34 +197,26 @@ function App() {
     return () => { active = false; };
   }, []);
 
-  // CLEAR PREVIOUS SESSION ON EVERY FRESH APP OPEN.
-  // Keep the icon-only loading screen visible for 5 seconds.
+  // Restore an existing login session instead of logging students out on refresh.
   useEffect(() => {
     let isMounted = true;
     let splashTimer;
-
     const startTime = Date.now();
 
     async function initializeApp() {
+      let restoredUser = null;
       try {
-        await apiRequest("logout.php", {
-          method: "POST",
-        });
+        const result = await apiRequest("me.php");
+        restoredUser = result.user || null;
       } catch (error) {
-        console.error(
-          "Unable to clear previous login session:",
-          error
-        );
+        // A missing or expired session should lead to the login screen.
+        restoredUser = null;
       } finally {
         const elapsed = Date.now() - startTime;
-        const remaining = Math.max(
-          0,
-          SPLASH_DURATION - elapsed
-        );
-
+        const remaining = Math.max(0, SPLASH_DURATION - elapsed);
         splashTimer = window.setTimeout(() => {
           if (isMounted) {
-            setUser(null);
+            setUser(restoredUser);
             setAuthLoading(false);
           }
         }, remaining);
@@ -232,44 +224,11 @@ function App() {
     }
 
     initializeApp();
-
     return () => {
       isMounted = false;
-
-      if (splashTimer) {
-        window.clearTimeout(splashTimer);
-      }
+      if (splashTimer) window.clearTimeout(splashTimer);
     };
   }, []);
-
-  // ATTEMPT LOGOUT WHEN THE APP IS CLOSED OR REFRESHED.
-  useEffect(() => {
-    if (!user) return;
-
-    function logoutOnExit() {
-      const logoutUrl = "/backend/logout.php";
-
-      if (navigator.sendBeacon) {
-        const payload = new Blob([], {
-          type: "application/x-www-form-urlencoded",
-        });
-
-        navigator.sendBeacon(logoutUrl, payload);
-      } else {
-        fetch(logoutUrl, {
-          method: "POST",
-          credentials: "include",
-          keepalive: true,
-        }).catch(() => {});
-      }
-    }
-
-    window.addEventListener("pagehide", logoutOnExit);
-
-    return () => {
-      window.removeEventListener("pagehide", logoutOnExit);
-    };
-  }, [user]);
 
   // LOG OUT.
   async function handleLogout() {
