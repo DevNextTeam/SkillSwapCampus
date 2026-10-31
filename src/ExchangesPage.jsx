@@ -51,10 +51,7 @@ function ExchangesPage() {
     }
   }
 
-  useEffect(() => {
-    loadExchanges();
-
-  }, []);
+  useEffect(() => {\n    let active = true;\n    Promise.resolve().then(() => { if (active) loadExchanges(); });\n    return () => { active = false; };\n  }, []);
 
   // Accept or reject a received exchange request.
   async function handleResponse(exchangeId, status) {
