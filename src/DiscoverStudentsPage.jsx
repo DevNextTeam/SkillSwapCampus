@@ -208,7 +208,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
       ) : (
         <div className="discover-grid">
           {filteredStudents.map((student) => (
-            <article className="student-card" key={student.id}>
+            <article className="student-card student-card-clickable" key={student.id} role="button" tabIndex={0} onClick={() => openStudent(student)} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); openStudent(student); } }}>
               <div className="student-card-top">
                 <div className="student-avatar">{student.profile_photo ? <img src={`${API_BASE}/${student.profile_photo}`} alt="" /> : getInitials(student.full_name)}</div>
 
@@ -270,10 +270,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                     )}
                   </div>
                 </div>
-                <div className="student-card-footer">
-                  <span>View profile</span>
-                  <span aria-hidden="true">→</span>
-                </div>
+                <button className="student-card-footer" type="button" onClick={(event) => { event.stopPropagation(); openStudent(student); }}>View profile <span aria-hidden="true">→</span></button>
               </div>
             </article>
           ))}
