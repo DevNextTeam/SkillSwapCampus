@@ -83,6 +83,7 @@ function ProfilePage({ user, onProfileUpdated }) {
   });
 
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
@@ -123,6 +124,7 @@ function ProfilePage({ user, onProfileUpdated }) {
 
       setMessage("Your profile has been updated successfully!");
       setMessageType("success");
+      setEditing(false);
     } catch (error) {
       setMessage(error.message || "Unable to save your profile.");
       setMessageType("error");
@@ -156,6 +158,9 @@ function ProfilePage({ user, onProfileUpdated }) {
             Campus Member
           </span>
         </div>
+        <button type="button" className="primary-button profile-edit-button" onClick={() => setEditing(true)} disabled={editing}>
+          <Pencil size={16} /> Edit Profile
+        </button>
       </div>
 
       <form className="profile-form" onSubmit={handleSubmit}>
@@ -173,6 +178,7 @@ function ProfilePage({ user, onProfileUpdated }) {
             <label htmlFor="full_name">Full Name</label>
 
             <input
+              disabled={!editing}
               id="full_name"
               name="full_name"
               type="text"
@@ -201,6 +207,7 @@ function ProfilePage({ user, onProfileUpdated }) {
             <label htmlFor="university">University</label>
 
             <input
+              disabled={!editing}
               id="university"
               name="university"
               type="text"
@@ -215,6 +222,7 @@ function ProfilePage({ user, onProfileUpdated }) {
             <label htmlFor="course">Course / Program</label>
 
             <input
+              disabled={!editing}
               id="course"
               name="course"
               type="text"
@@ -229,6 +237,7 @@ function ProfilePage({ user, onProfileUpdated }) {
             <label htmlFor="year_level">Year Level</label>
 
             <select
+              disabled={!editing}
               id="year_level"
               name="year_level"
               value={form.year_level}
@@ -249,6 +258,7 @@ function ProfilePage({ user, onProfileUpdated }) {
             <label htmlFor="bio">About Me</label>
 
             <textarea
+              disabled={!editing}
               id="bio"
               name="bio"
               placeholder="Tell other students about yourself, your interests, and the skills you want to learn..."
@@ -268,16 +278,17 @@ function ProfilePage({ user, onProfileUpdated }) {
           </div>
         )}
 
-        <div className="profile-form-actions">
-          <button
-            type="submit"
-            className="primary-button profile-save-button"
-            disabled={saving}
-          >
-            <Save size={17} />
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
+        {editing && (
+          <div className="profile-form-actions">
+            <button type="button" className="skill-cancel-button" onClick={() => setEditing(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button type="submit" className="primary-button profile-save-button" disabled={saving}>
+              <Save size={17} />
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );
