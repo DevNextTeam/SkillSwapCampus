@@ -28,9 +28,9 @@ export default function DiscoverStudentsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState("");\n  const [selected, setSelected] = useState(null);\n  const [detailLoading, setDetailLoading] = useState(false);\n  const [notice, setNotice] = useState("");\n  const [messageText, setMessageText] = useState("");\n  const [conversation, setConversation] = useState([]);
 
-  async function loadStudents() {
+  async function openStudent(student) {\n    setSelected(student); setDetailLoading(true); setNotice(""); setConversation([]);\n    try { const result = await apiRequest(`get_student_profile.php?id=${student.id}`); setSelected(result.student); }\n    catch (err) { setNotice(err.message || "Unable to load profile."); }\n    finally { setDetailLoading(false); }\n  }\n\n  async function friendAction(action) {\n    try { const result = await apiRequest("friend_request.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, action }) }); setNotice(result.message); const refreshed = await apiRequest(`get_student_profile.php?id=${selected.id}`); setSelected(refreshed.student); }\n    catch (err) { setNotice(err.message || "Unable to update friend request."); }\n  }\n\n  async function loadConversation() {\n    try { const result = await apiRequest(`messages.php?user_id=${selected.id}`); setConversation(result.messages || []); }\n    catch (err) { setNotice(err.message || "Unable to load messages."); }\n  }\n\n  async function sendMessage(event) {\n    event.preventDefault(); if (!messageText.trim()) return;\n    try { await apiRequest("messages.php", { method:"POST", body:JSON.stringify({ user_id:selected.id, body:messageText.trim() }) }); setMessageText(""); await loadConversation(); }\n    catch (err) { setNotice(err.message || "Unable to send message."); }\n  }\n\n  async function loadStudents() {
     setLoading(true);
     setError("");
 
@@ -178,7 +178,7 @@ export default function DiscoverStudentsPage() {
       ) : (
         <div className="discover-grid">
           {filteredStudents.map((student) => (
-            <article className="student-card" key={student.id}>
+            <article className="student-card student-card-clickable" key={student.id} role="button" tabIndex={0} onClick={() => openStudent(student)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openStudent(student); } }}>
               <div className="student-card-top">
                 <div className="student-avatar">
                   {getInitials(student.full_name)}
