@@ -32,6 +32,7 @@ try {
             u.course,
             u.year_level,
             u.bio,
+            u.profile_photo,
 
             GROUP_CONCAT(
                 DISTINCT CASE
@@ -61,7 +62,8 @@ try {
             u.university,
             u.course,
             u.year_level,
-            u.bio
+            u.bio,
+            u.profile_photo
 
         ORDER BY u.full_name ASC
     ";
