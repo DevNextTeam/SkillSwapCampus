@@ -16,7 +16,9 @@ if ($_SERVER["REQUEST_METHOD"]==="GET") {
  exit;
 }
 if ($_SERVER["REQUEST_METHOD"]!=="POST") { http_response_code(405); echo json_encode(["success"=>false,"message"=>"Method not allowed."]); exit; }
-$data=json_decode(file_get_contents("php://input"),true) ?: []; $other=filter_var($data["user_id"]??null,FILTER_VALIDATE_INT); $rawBody=$data["body"]??""; $body=is_string($rawBody)?trim($rawBody):"";
+$data=json_decode(file_get_contents("php://input"),true);
+if (!is_array($data)) { http_response_code(400); echo json_encode(["success"=>false,"message"=>"Invalid message data."]); exit; }
+$other=filter_var($data["user_id"]??null,FILTER_VALIDATE_INT); $rawBody=$data["body"]??""; $body=is_string($rawBody)?trim($rawBody):"";
 if (!$other || $other===$me || $body==="" || (function_exists("mb_strlen") ? mb_strlen($body) : strlen($body))>4000) { http_response_code(400); echo json_encode(["success"=>false,"message"=>"Enter a message of up to 4,000 characters."]); exit; }
 try {
  $q=$pdo->prepare("SELECT id FROM friend_requests WHERE status='accepted' AND ((sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?)) LIMIT 1"); $q->execute([$me,$other,$other,$me]);
