@@ -183,6 +183,7 @@ function App() {
 
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showStartupSplash] = useState(() => { try { return window.sessionStorage.getItem("skillswap-session-active") !== "1"; } catch { return true; } });
 
   useEffect(() => {
     let active = true;
@@ -278,12 +279,13 @@ function App() {
         restoredUser = null;
       } finally {
         // Keep the branded splash visible briefly so startup never flashes past unnoticed.
-        const remaining = Math.max(0, 3500 - (Date.now() - startedAt));
+        const remaining = showStartupSplash ? Math.max(0, 3500 - (Date.now() - startedAt)) : 0;
         if (remaining) {
           await new Promise((resolve) => window.setTimeout(resolve, remaining));
         }
         if (isMounted) {
           setUser(restoredUser);
+          if (restoredUser) { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch {} }
           setAuthLoading(false);
         }
       }
@@ -303,6 +305,7 @@ function App() {
       });
 
       setUser(null);
+      try { window.sessionStorage.removeItem("skillswap-session-active"); } catch {}
       setActivePage("Dashboard");
       setSkillMode("browse");
       setMenuOpen(false);
@@ -342,7 +345,7 @@ function App() {
 
 
   // LOGO AND ANIMATED LOADING SCREEN.
-  if (authLoading) {
+  if (authLoading && showStartupSplash) {
     return (
       <div className="app-splash-screen">
         <div className="splash-content">
@@ -362,9 +365,12 @@ function App() {
     );
   }
 
+  // Avoid showing a loading screen on ordinary browser refreshes.
+  if (authLoading) return null;
+
   // SHOW LOGIN PAGE AFTER THE STARTUP SCREEN.
   if (!user) {
-    return <Auth onLogin={setUser} />;
+    return <Auth onLogin={(nextUser) => { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch {} setUser(nextUser); }} />;
   }
 
   return (
