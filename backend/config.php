@@ -1,20 +1,23 @@
 
 <?php
 
-// Allow requests from our React development app
-$allowedOrigin = "http://localhost:5173";
+// Allow the React app on your laptop and mobile phone
+$allowedOrigins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://10.0.9.203:5173"
+];
 
-if (
-    isset($_SERVER["HTTP_ORIGIN"]) &&
-    $_SERVER["HTTP_ORIGIN"] === $allowedOrigin
-) {
-    header("Access-Control-Allow-Origin: " . $allowedOrigin);
+$origin = $_SERVER["HTTP_ORIGIN"] ?? "";
+
+if (in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: " . $origin);
 }
 
 header("Vary: Origin");
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json; charset=UTF-8");
 
 // Handle browser preflight requests

@@ -1,5 +1,5 @@
 
-const API_URL = "http://localhost/skillswap-campus/backend";
+const API_URL = "http://10.0.9.203/skillswap-campus/backend";
 
 export async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_URL}/${endpoint}`, {
