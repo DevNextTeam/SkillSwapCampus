@@ -109,7 +109,7 @@ function ProfilePage({ user, onProfileUpdated }) {
     finally { setPhotoUploading(false); event.target.value = ""; }
   }
 
-  const initials = form.full_name.trim().split(/\\s+/).filter(Boolean)
+  const initials = form.full_name.trim().split(/\s+/).filter(Boolean)
     .map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST";
 
   return (
