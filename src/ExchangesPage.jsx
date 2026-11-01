@@ -80,14 +80,27 @@ function ExchangesPage() {
         }
       );
 
-      // Refresh the list without showing the initial loading screen.
-      await loadExchanges(false);
+      // Refuse to update the UI if the server confirms a different request ID.
+      if (String(result.exchange_id) !== String(exchangeId)) {
+        throw new Error("The server response did not match the selected exchange. Please refresh.");
+      }
 
-      setMessage(
-        result.message || "Request updated successfully!"
+      // Update only the selected card immediately; never bulk-change local statuses.
+      setExchanges((current) =>
+        current.map((item) =>
+          String(item.id) === String(exchangeId)
+            ? { ...item, status: result.status }
+            : item
+        )
       );
 
+      setMessage(
+        result.message || "This exchange request was updated."
+      );
       setMessageType("success");
+
+      // Reconcile with the database after the selected card has updated.
+      await loadExchanges(false);
 
     } catch (error) {
       const errorMessage = error.message || "";
