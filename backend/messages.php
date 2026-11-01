@@ -2,6 +2,9 @@
 require_once "config.php"; require_once "db.php";
 if (empty($_SESSION["user_id"])) { http_response_code(401); echo json_encode(["success"=>false,"message"=>"Please log in first."]); exit; }
 $me=(int)$_SESSION["user_id"];
+// Release PHP's per-session lock before database work so chat polling does not
+// serialize conversation switches, notifications, and other requests.
+session_write_close();
 if ($_SERVER["REQUEST_METHOD"]==="GET") {
  $other=filter_input(INPUT_GET,"user_id",FILTER_VALIDATE_INT);
  if (!$other || $other===$me) { http_response_code(400); echo json_encode(["success"=>false,"message"=>"Invalid conversation."]); exit; }
