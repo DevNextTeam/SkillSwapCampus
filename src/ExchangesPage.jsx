@@ -10,6 +10,9 @@ import {
   BookOpen,
   GraduationCap,
   Inbox,
+  Search,
+  SlidersHorizontal,
+  X,
 } from "lucide-react";
 
 import { apiRequest } from "./api";
@@ -19,6 +22,8 @@ function ExchangesPage() {
   const [exchanges, setExchanges] = useState([]);
   const latestLoadId = useRef(0);
   const [activeTab, setActiveTab] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
   const [message, setMessage] = useState("");
@@ -138,17 +143,19 @@ function ExchangesPage() {
     }
   }
 
-  // Filter requests by direction.
+  // Search by skill, student, or university, then narrow by direction and status.
   const filteredExchanges = exchanges.filter((exchange) => {
-    if (activeTab === "sent") {
-      return exchange.request_direction === "sent";
-    }
-
-    if (activeTab === "received") {
-      return exchange.request_direction === "received";
-    }
-
-    return true;
+    const directionMatches = activeTab === "all" || exchange.request_direction === activeTab;
+    const statusMatches = statusFilter === "all" || exchange.status === statusFilter;
+    const searchable = [
+      exchange.skill_name,
+      exchange.category,
+      exchange.requester_name,
+      exchange.receiver_name,
+      exchange.requester_university,
+      exchange.receiver_university,
+    ].filter(Boolean).join(" ").toLowerCase();
+    return directionMatches && statusMatches && searchable.includes(search.trim().toLowerCase());
   });
 
   // Format the proposed session date.
@@ -291,6 +298,25 @@ function ExchangesPage() {
 
       </div>
 
+      <div className="exchange-tools">
+        <label className="exchange-search">
+          <Search size={18} />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search skills, students, or campus..." aria-label="Search exchanges" />
+          {search && <button type="button" onClick={() => setSearch("")} aria-label="Clear search"><X size={16} /></button>}
+        </label>
+        <label className="exchange-status-filter">
+          <SlidersHorizontal size={16} />
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter exchanges by status">
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="completed">Completed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+        <span className="exchange-result-count">{filteredExchanges.length} of {exchanges.length} requests</span>
+      </div>
+
       {/* EXCHANGE REQUESTS */}
       {loading ? (
 
@@ -308,14 +334,10 @@ function ExchangesPage() {
         <div className="exchanges-empty">
           <Inbox size={38} />
 
-          <h3>No exchange requests yet</h3>
+          <h3>{search || statusFilter !== "all" ? "No matching exchanges" : "No exchange requests yet"}</h3>
 
           <p>
-            {activeTab === "sent"
-              ? "The requests you send to other students will appear here."
-              : activeTab === "received"
-                ? "Requests from other students will appear here."
-                : "When you connect with students through skill posts, your exchanges will appear here."}
+            {search || statusFilter !== "all" ? "Try a different search or clear the selected filters." : activeTab === "sent" ? "The requests you send to other students will appear here." : activeTab === "received" ? "Requests from other students will appear here." : "When you connect with students through skill posts, your exchanges will appear here."}
           </p>
         </div>
 
