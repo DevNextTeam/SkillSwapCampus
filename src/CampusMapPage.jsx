@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiRequest, API_BASE } from "./api";
-import { MapPin, LocateFixed, Radio, ShieldCheck, Users, RefreshCw, AlertCircle } from "lucide-react";
+import { MapPin, LocateFixed, Radio, ShieldCheck, Users, RefreshCw, AlertCircle, Search, UserPlus, MessageCircle, X, GraduationCap } from "lucide-react";
 import "./CampusMapPage.css";
 
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -37,7 +37,7 @@ function initials(name = "") {
   return name.trim().split(/\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST";
 }
 
-export default function CampusMapPage({ user }) {
+export default function CampusMapPage({ user, onNavigate }) {
   const mapElement = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef(new Map());
@@ -51,6 +51,40 @@ export default function CampusMapPage({ user }) {
   const [error, setError] = useState("");
   const [mapReady, setMapReady] = useState(false);
   const [myPosition, setMyPosition] = useState(null);
+  const [precision, setPrecision] = useState("exact");
+  const [search, setSearch] = useState("");
+  const [universityFilter, setUniversityFilter] = useState("all");
+  const [courseFilter, setCourseFilter] = useState("all");
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [profileNotice, setProfileNotice] = useState("");
+  const [friendBusy, setFriendBusy] = useState(false);
+
+  const visibleLocations = locations.filter((student) => {
+    const query = search.trim().toLowerCase();
+    const matches = !query || [student.full_name, student.university, student.course].some((value) => (value || "").toLowerCase().includes(query));
+    return matches && (universityFilter === "all" || student.university === universityFilter) && (courseFilter === "all" || student.course === courseFilter);
+  });
+  const universities = [...new Set(locations.map((student) => student.university).filter(Boolean))].sort();
+  const courses = [...new Set(locations.map((student) => student.course).filter(Boolean))].sort();
+  const distanceKm = (a, b) => { const rad = (value) => value * Math.PI / 180; const dLat = rad(Number(b.latitude) - Number(a.latitude)); const dLng = rad(Number(b.longitude) - Number(a.longitude)); const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(Number(a.latitude))) * Math.cos(rad(Number(b.latitude))) * Math.sin(dLng / 2) ** 2; return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); };
+
+  const openStudentProfile = async (student) => {
+    setSelectedStudent({ id: student.user_id, full_name: student.full_name, university: student.university, course: student.course, profile_photo: student.profile_photo });
+    setProfileLoading(true); setProfileError(""); setProfileNotice("");
+    try { const result = await apiRequest("get_student_profile.php?id=" + encodeURIComponent(student.user_id)); setSelectedStudent(result.student); }
+    catch (err) { setProfileError(err.message || "Unable to load this profile."); }
+    finally { setProfileLoading(false); }
+  };
+
+  const sendFriendRequest = async () => {
+    if (!selectedStudent) return;
+    setFriendBusy(true); setProfileError(""); setProfileNotice("");
+    try { const result = await apiRequest("friend_request.php", { method: "POST", body: JSON.stringify({ user_id: selectedStudent.id, action: "send" }) }); setProfileNotice(result.message || "Friend request sent."); const refreshed = await apiRequest("get_student_profile.php?id=" + encodeURIComponent(selectedStudent.id)); setSelectedStudent(refreshed.student); }
+    catch (err) { setProfileError(err.message || "Unable to send friend request."); }
+    finally { setFriendBusy(false); }
+  };
 
   const loadLocations = useCallback(async () => {
     try {
@@ -102,7 +136,7 @@ export default function CampusMapPage({ user }) {
     for (const [id, marker] of markersRef.current.entries()) {
       if (!currentIds.has(id)) { marker.remove(); markersRef.current.delete(id); }
     }
-    locations.forEach((student) => {
+    visibleLocations.forEach((student) => {
       const id = String(student.user_id);
       const isMe = Number(student.user_id) === Number(user.id);
       const label = isMe ? "You" : student.full_name;
@@ -120,7 +154,7 @@ export default function CampusMapPage({ user }) {
         markersRef.current.set(id, marker);
       }
     });
-  }, [locations, mapReady, user.id]);
+  }, [visibleLocations, mapReady, user.id]);
 
   const stopSharing = useCallback(async (announce = true) => {
     if (watchRef.current !== null && navigator.geolocation) navigator.geolocation.clearWatch(watchRef.current);
@@ -140,6 +174,7 @@ export default function CampusMapPage({ user }) {
   const startSharing = () => {
     setError("");
     setMessage("");
+    lastSentRef.current = 0;
     if (!window.isSecureContext && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
       setError("Location sharing requires HTTPS. Open SkillSwap Campus through a secure connection.");
       return;
@@ -151,7 +186,8 @@ export default function CampusMapPage({ user }) {
     setMessage("Waiting for your browser's location permission…");
     const watchId = navigator.geolocation.watchPosition(async (position) => {
       const coords = position.coords;
-      const nextCoords = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy };
+      const decimals = precision === "approximate" ? 2 : 7;
+      const nextCoords = { latitude: Number(coords.latitude.toFixed(decimals)), longitude: Number(coords.longitude.toFixed(decimals)), accuracy: precision === "approximate" ? Math.max(coords.accuracy || 0, 1000) : coords.accuracy };
       lastCoordsRef.current = nextCoords;
       setMyPosition({ latitude: coords.latitude, longitude: coords.longitude });
       setSharing(true);
@@ -215,8 +251,9 @@ export default function CampusMapPage({ user }) {
         <div><span className="campus-map-eyebrow">CAMPUS COMMUNITY · LIVE</span><h2>Find your people on campus.</h2><p>See students who have chosen to share where they are. Your exact location stays private until you turn sharing on.</p></div>
       </section>
       <section className="campus-map-controls">
-        <div className="campus-map-status"><span className={sharing ? "live-dot active" : "live-dot"} /> <div><strong>{sharing ? "You're sharing your location" : "Location sharing is off"}</strong><small>{locations.length} student{locations.length === 1 ? "" : "s"} currently visible</small></div></div>
+        <div className="campus-map-status"><span className={sharing ? "live-dot active" : "live-dot"} /> <div><strong>{sharing ? "You're sharing your location" : "Location sharing is off"}</strong><small>{visibleLocations.length} student{visibleLocations.length === 1 ? "" : "s"} currently visible</small></div></div>
         <div className="campus-map-actions">
+          <label className="campus-map-precision">Precision<select value={precision} onChange={(event) => setPrecision(event.target.value)} disabled={sharing}><option value="exact">Exact GPS</option><option value="approximate">Approximate (~1 km)</option></select></label>
           {!sharing ? <button type="button" className="campus-map-share" onClick={startSharing}><Radio size={17} /> Share my location</button> : <button type="button" className="campus-map-stop" onClick={() => stopSharing()}><ShieldCheck size={17} /> Stop sharing</button>}
           <button type="button" className="campus-map-secondary" onClick={centerOnMe} title="Center map on my location"><LocateFixed size={17} /></button>
           <button type="button" className="campus-map-secondary" onClick={loadLocations} title="Refresh student locations"><RefreshCw size={16} /></button>
@@ -224,10 +261,11 @@ export default function CampusMapPage({ user }) {
       </section>
       {message && <p className="campus-map-notice" role="status">{message}</p>}
       {error && <p className="campus-map-error" role="alert"><AlertCircle size={16} />{error}</p>}
+      <section className="campus-map-discovery"><div className="campus-map-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, university, or course" aria-label="Search students"/></div><select value={universityFilter} onChange={(event) => setUniversityFilter(event.target.value)} aria-label="Filter university"><option value="all">All universities</option>{universities.map((name) => <option key={name} value={name}>{name}</option>)}</select><select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} aria-label="Filter course"><option value="all">All courses</option>{courses.map((name) => <option key={name} value={name}>{name}</option>)}</select><span>{visibleLocations.length} students</span></section>
       <section className="campus-map-layout">
         <div className="campus-map-canvas-wrap"><div ref={mapElement} className="campus-map-canvas" aria-label="Live map of students sharing their location" />{!mapReady && <div className="campus-map-loading">Loading interactive map…</div>}</div>
         <aside className="campus-map-roster"><div className="campus-map-roster-heading"><div><h3>Students nearby</h3><p>Live location sharing</p></div><Users size={19} /></div>
-          {loading ? <p className="campus-map-roster-empty">Loading student locations…</p> : locations.length === 0 ? <div className="campus-map-roster-empty"><MapPin size={22}/><strong>No students sharing yet</strong><span>Turn on your location to be the first on the map.</span></div> : <div className="campus-map-roster-list">{locations.map((student) => <button type="button" key={student.user_id} className="campus-map-roster-person" onClick={() => mapRef.current?.setView([Number(student.latitude), Number(student.longitude)], 16)}><span className="campus-map-roster-avatar">{student.profile_photo ? <img src={API_BASE + "/" + student.profile_photo} alt="" /> : initials(student.full_name)}</span><span><strong>{Number(student.user_id) === Number(user.id) ? "You" : student.full_name}</strong><small>{student.university || student.course || "Campus student"}</small></span><span className="campus-map-roster-live" /></button>)}</div>}
+          {loading ? <p className="campus-map-roster-empty">Loading student locations…</p> : visibleLocations.length === 0 ? <div className="campus-map-roster-empty"><MapPin size={22}/><strong>No students sharing yet</strong><span>Turn on your location to be the first on the map.</span></div> : <div className="campus-map-roster-list">{visibleLocations.map((student) => <button type="button" key={student.user_id} className="campus-map-roster-person" onClick={() => { mapRef.current?.setView([Number(student.latitude), Number(student.longitude)], 16); openStudentProfile(student); }}><span className="campus-map-roster-avatar">{student.profile_photo ? <img src={API_BASE + "/" + student.profile_photo} alt="" /> : initials(student.full_name)}</span><span><strong>{Number(student.user_id) === Number(user.id) ? "You" : student.full_name}</strong><small>{student.university || student.course || "Campus student"}</small></span><span className="campus-map-roster-distance">{myPosition ? distanceKm(myPosition, student).toFixed(1) + " km" : "View"}</span></button>)}</div>}
           <div className="campus-map-privacy"><ShieldCheck size={17}/><span>Only signed-in students can see shared locations. Locations expire automatically after two minutes without an update.</span></div>
         </aside>
       </section>
