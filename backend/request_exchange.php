@@ -33,6 +33,12 @@ if (!is_array($data)) {
     exit;
 }
 
+if (isset($data["skill_id"]) && !is_scalar($data["skill_id"])) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid skill selected."]);
+    exit;
+}
+
 $skillId = filter_var(
     $data["skill_id"] ?? null,
     FILTER_VALIDATE_INT
