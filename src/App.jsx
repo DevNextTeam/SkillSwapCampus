@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import AppFooter from "./AppFooter";
 
 import {
@@ -185,6 +185,7 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationsError, setNotificationsError] = useState("");
+  const notificationRequestId = useRef(0);
 
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -233,25 +234,40 @@ function App() {
   }
 
   const loadNotifications = useCallback(async () => {
+    const requestId = ++notificationRequestId.current;
     setNotificationsLoading(true);
     setNotificationsError("");
     try {
       const result = await apiRequest("notifications.php");
-      setNotifications(result.notifications || []);
+      if (requestId === notificationRequestId.current) {
+        setNotifications(Array.isArray(result.notifications) ? result.notifications : []);
+      }
     } catch (error) {
-      setNotificationsError(error.message || "Unable to load notifications.");
+      if (requestId === notificationRequestId.current) {
+        setNotificationsError(error.message || "Unable to load notifications.");
+      }
     } finally {
-      setNotificationsLoading(false);
+      if (requestId === notificationRequestId.current) setNotificationsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (!user) return undefined;
     const initialLoad = window.setTimeout(loadNotifications, 0);
-    const timer = window.setInterval(loadNotifications, 30000);
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadNotifications();
+    }, 30000);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") loadNotifications();
+    };
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
     return () => {
       window.clearTimeout(initialLoad);
       window.clearInterval(timer);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      notificationRequestId.current += 1;
     };
   }, [user, loadNotifications]);
 
