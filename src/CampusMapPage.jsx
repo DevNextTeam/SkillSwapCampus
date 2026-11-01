@@ -151,6 +151,7 @@ export default function CampusMapPage({ user, onNavigate }) {
         markersRef.current.get(id).setLatLng(point).setPopupContent(popup);
       } else {
         const marker = L.marker(point, { icon }).addTo(map).bindPopup(popup);
+        marker.on("click", () => openStudentProfile(student));
         markersRef.current.set(id, marker);
       }
     });
