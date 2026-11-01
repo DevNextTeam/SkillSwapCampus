@@ -142,7 +142,7 @@ export default function CampusMapPage({ user, onNavigate }) {
     const L = window.L;
     const map = mapRef.current;
     if (!L || !map || !mapReady) return;
-    const currentIds = new Set(locations.map((item) => String(item.user_id)));
+    const currentIds = new Set(visibleLocations.map((item) => String(item.user_id)));
     for (const [id, marker] of markersRef.current.entries()) {
       if (!currentIds.has(id)) { marker.remove(); markersRef.current.delete(id); }
     }
@@ -158,7 +158,7 @@ export default function CampusMapPage({ user, onNavigate }) {
       const popup = '<div class="campus-map-popup"><strong>' + (label || "Campus student").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</strong><span>' + (student.university || "SkillSwap Campus").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</span><small>Updated ' + new Date(student.updated_at.replace(" ", "T") + (student.updated_at.includes("Z") ? "" : "Z")).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + '</small></div>';
       const point = [Number(student.latitude), Number(student.longitude)];
       if (markersRef.current.has(id)) {
-        markersRef.current.get(id).setLatLng(point).setPopupContent(popup);
+        markersRef.current.get(id).setLatLng(point).setPopupContent(popup).off("click").on("click", () => openStudentProfile(student));
       } else {
         const marker = L.marker(point, { icon }).addTo(map).bindPopup(popup);
         marker.on("click", () => openStudentProfile(student));
