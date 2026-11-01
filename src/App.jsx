@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AppFooter from "./AppFooter";
 
 import {
@@ -232,7 +232,7 @@ function App() {
     }
   }
 
-  async function loadNotifications() {
+  const loadNotifications = useCallback(async () => {
     setNotificationsLoading(true);
     setNotificationsError("");
     try {
@@ -243,14 +243,17 @@ function App() {
     } finally {
       setNotificationsLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    if (!user) return;
-    loadNotifications();
+    if (!user) return undefined;
+    const initialLoad = window.setTimeout(loadNotifications, 0);
     const timer = window.setInterval(loadNotifications, 30000);
-    return () => window.clearInterval(timer);
-  }, [user?.id]);
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(timer);
+    };
+  }, [user, loadNotifications]);
 
     // Play downloaded startup sound when the splash screen appears.
     useEffect(() => {
@@ -259,8 +262,6 @@ function App() {
       const audio = new Audio("/sounds/loading-sound.mp3");
       audio.volume = 0.75;
       audio.preload = "auto";
-
-      let cancelled = false;
 
       const playSound = async () => {
         try {
@@ -273,7 +274,6 @@ function App() {
       playSound();
 
       return () => {
-        cancelled = true;
         audio.pause();
         audio.currentTime = 0;
         audio.removeAttribute("src");
@@ -302,7 +302,7 @@ function App() {
         }
         if (isMounted) {
           setUser(restoredUser);
-          if (restoredUser) { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch {} }
+          if (restoredUser) { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch { /* Storage may be unavailable in private browsing. */ } }
           setAuthLoading(false);
         }
       }
@@ -322,7 +322,7 @@ function App() {
       });
 
       setUser(null);
-      try { window.sessionStorage.removeItem("skillswap-session-active"); } catch {}
+      try { window.sessionStorage.removeItem("skillswap-session-active"); } catch { /* Storage may be unavailable in private browsing. */ }
       setActivePage("Dashboard");
       setSkillMode("browse");
       setMenuOpen(false);
@@ -387,7 +387,7 @@ function App() {
 
   // SHOW LOGIN PAGE AFTER THE STARTUP SCREEN.
   if (!user) {
-    return <Auth onLogin={(nextUser) => { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch {} setUser(nextUser); }} />;
+    return <Auth onLogin={(nextUser) => { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch { /* Storage may be unavailable in private browsing. */ } setUser(nextUser); }} />;
   }
 
   return (
