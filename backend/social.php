@@ -4,6 +4,8 @@ require_once "db.php";
 if ($_SERVER["REQUEST_METHOD"] !== "GET") { http_response_code(405); echo json_encode(["success"=>false,"message"=>"Only GET requests are allowed."]); exit; }
 if (empty($_SESSION["user_id"])) { http_response_code(401); echo json_encode(["success"=>false,"message"=>"Please log in first."]); exit; }
 $me=(int)$_SESSION["user_id"];
+// Do not hold PHP's session lock while loading the friends list and previews.
+session_write_close();
 try {
  $q=$pdo->prepare("SELECT fr.id AS request_id, fr.sender_id AS user_id, u.full_name, u.university, u.profile_photo, fr.created_at FROM friend_requests fr JOIN users u ON u.id=fr.sender_id WHERE fr.receiver_id=? AND fr.status='pending' ORDER BY fr.created_at DESC");
  $q->execute([$me]); $incoming=$q->fetchAll(PDO::FETCH_ASSOC);
