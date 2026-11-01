@@ -29,3 +29,7 @@ dist-ssr
 !.env.example
 
 # PHP dependencies
+
+# User-uploaded profile images are stored on the server, not in Git.
+backend/uploads/profiles/*
+!backend/uploads/profiles/.htaccess
