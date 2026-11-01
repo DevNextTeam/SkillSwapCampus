@@ -391,3 +391,66 @@
     flex-direction: column;
   }
 }
+
+
+/* Exchange search and status filters */
+.exchange-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: -4px 0 20px;
+}
+.exchange-search,
+.exchange-status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid #e5ebf2;
+  border-radius: 10px;
+  background: #fff;
+  color: #7b8998;
+}
+.exchange-search { flex: 1 1 280px; }
+.exchange-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #1c2b3a;
+  font: inherit;
+  font-size: 13px;
+}
+.exchange-search button {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #7b8998;
+  cursor: pointer;
+}
+.exchange-status-filter { flex: 0 0 auto; }
+.exchange-status-filter select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #43566a;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.exchange-result-count {
+  margin-left: auto;
+  color: #7b8998;
+  font-size: 12px;
+  font-weight: 650;
+}
+@media (max-width: 520px) {
+  .exchange-tools { align-items: stretch; }
+  .exchange-search, .exchange-status-filter { flex: 1 1 100%; }
+  .exchange-result-count { margin-left: 0; }
+}
