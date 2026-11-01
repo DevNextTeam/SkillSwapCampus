@@ -80,13 +80,15 @@ try {
     session_regenerate_id(true);
 
     $_SESSION["user_id"] = $user["id"];
+    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
 
     unset($user["password_hash"]);
 
     echo json_encode([
         "success" => true,
         "message" => "Login successful!",
-        "user" => $user
+        "user" => $user,
+        "csrf_token" => $_SESSION["csrf_token"]
     ]);
 
 } catch (PDOException $e) {
