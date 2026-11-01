@@ -185,6 +185,10 @@ function ExchangesPage() {
     (item) => item.status === "accepted"
   ).length;
 
+  const completedCount = exchanges.filter(
+    (item) => item.status === "completed"
+  ).length;
+
   return (
     <div className="exchanges-page">
 
@@ -231,6 +235,11 @@ function ExchangesPage() {
         <div className="exchange-summary-card">
           <span>Accepted</span>
           <strong>{acceptedCount}</strong>
+        </div>
+
+        <div className="exchange-summary-card">
+          <span>Completed</span>
+          <strong>{completedCount}</strong>
         </div>
 
       </div>
