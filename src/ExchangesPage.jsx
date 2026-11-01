@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   RefreshCw,
   ArrowUpRight,
@@ -17,6 +17,7 @@ import "./ExchangesPage.css";
 
 function ExchangesPage() {
   const [exchanges, setExchanges] = useState([]);
+  const latestLoadId = useRef(0);
   const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
@@ -26,6 +27,8 @@ function ExchangesPage() {
   // Load exchange requests from the database.
   // showLoading=false refreshes the data without hiding the page.
   async function loadExchanges(showLoading = true) {
+    const loadId = ++latestLoadId.current;
+
     if (showLoading) {
       setLoading(true);
     }
@@ -33,10 +36,13 @@ function ExchangesPage() {
     try {
       const result = await apiRequest("get_exchanges.php");
 
+      // Ignore older responses that finish after a newer refresh/update.
+      if (loadId !== latestLoadId.current) return false;
       setExchanges(result.exchanges || []);
 
       return true;
     } catch (error) {
+      if (loadId !== latestLoadId.current) return false;
       setMessage(
         error.message || "Unable to load your exchanges."
       );
@@ -45,7 +51,7 @@ function ExchangesPage() {
 
       return false;
     } finally {
-      if (showLoading) {
+      if (showLoading && loadId === latestLoadId.current) {
         setLoading(false);
       }
     }
