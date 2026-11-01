@@ -16,7 +16,8 @@ if ($host === "" || $dbname === "" || $username === "" ||
     ($isProduction && (getenv("DB_HOST") === false ||
         getenv("DB_NAME") === false ||
         getenv("DB_USER") === false ||
-        getenv("DB_PASSWORD") === false))) {
+        getenv("DB_PASSWORD") === false ||
+        trim((string) getenv("DB_PASSWORD")) === ""))) {
     http_response_code(500);
     header("Content-Type: application/json; charset=UTF-8");
     echo json_encode([
