@@ -20,3 +20,5 @@
 .social-friend-row .social-person-copy small { display:block; max-width:100%; }
 .social-chat-panel { min-height:520px; }
 @media(max-width:760px) { .social-layout.chat-open { grid-template-columns:minmax(0,1fr); } .social-layout.chat-open .social-list-panel { display:none; } .social-chat-panel { min-height:430px; } }
+
+.social-chat-loading{min-height:230px;display:flex;align-items:center;justify-content:center;gap:8px;color:#82918b;font-size:13px}.social-chat-loading span{width:7px;height:7px;border-radius:50%;background:#16856b;animation:social-chat-pulse 1s ease-in-out infinite}.social-chat-loading span:nth-child(2){animation-delay:.15s}.social-chat-loading span:nth-child(3){animation-delay:.3s}@keyframes social-chat-pulse{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
