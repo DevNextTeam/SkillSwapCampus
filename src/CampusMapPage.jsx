@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiRequest, API_BASE } from "./api";
-import { MapPin, LocateFixed, Radio, ShieldCheck, Users, RefreshCw, AlertCircle, Search, UserPlus, MessageCircle, X, GraduationCap } from "lucide-react";
+import { MapPin, LocateFixed, Radio, ShieldCheck, Users, RefreshCw, AlertCircle, Search, UserPlus, MessageCircle, X, GraduationCap, UserCheck, UserX } from "lucide-react";
 import "./CampusMapPage.css";
 
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -87,12 +87,19 @@ export default function CampusMapPage({ user, onNavigate }) {
     finally { setProfileLoading(false); }
   };
 
-  const sendFriendRequest = async () => {
-    if (!selectedStudent) return;
+  const updateFriendRequest = async (action) => {
+    if (!selectedStudent || friendBusy) return;
     setFriendBusy(true); setProfileError(""); setProfileNotice("");
-    try { const result = await apiRequest("friend_request.php", { method: "POST", body: JSON.stringify({ user_id: selectedStudent.id, action: "send" }) }); setProfileNotice(result.message || "Friend request sent."); const refreshed = await apiRequest("get_student_profile.php?id=" + encodeURIComponent(selectedStudent.id)); setSelectedStudent(refreshed.student); }
-    catch (err) { setProfileError(err.message || "Unable to send friend request."); }
-    finally { setFriendBusy(false); }
+    try {
+      const result = await apiRequest("friend_request.php", { method: "POST", body: JSON.stringify({ user_id: selectedStudent.id, action }) });
+      setProfileNotice(result.message || "Friend connection updated.");
+      const refreshed = await apiRequest("get_student_profile.php?id=" + encodeURIComponent(selectedStudent.id));
+      setSelectedStudent(refreshed.student);
+    } catch (err) {
+      setProfileError(err.message || "Unable to update this friend request.");
+    } finally {
+      setFriendBusy(false);
+    }
   };
 
   const loadLocations = useCallback(async () => {
@@ -288,7 +295,16 @@ export default function CampusMapPage({ user, onNavigate }) {
             {selectedStudent.bio && <p className="campus-map-profile-bio">{selectedStudent.bio}</p>}
             <div className="campus-map-profile-skills"><h4><GraduationCap size={16}/> Skills</h4>{selectedStudent.skills?.length ? <div>{selectedStudent.skills.map((skill) => <span key={skill.id}>{skill.skill_name} · {skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}</span>)}</div> : <p>No skills listed yet.</p>}</div>
             {profileError && <p className="campus-map-error">{profileError}</p>}{profileNotice && <p className="campus-map-notice">{profileNotice}</p>}
-            <div className="campus-map-profile-actions"><button type="button" className="campus-map-profile-primary" disabled={friendBusy || selectedStudent.friend_status?.status === "accepted" || selectedStudent.friend_status?.status === "pending"} onClick={sendFriendRequest}><UserPlus size={16}/>{friendBusy ? "Sending…" : selectedStudent.friend_status?.status === "accepted" ? "Already friends" : selectedStudent.friend_status?.status === "pending" ? (Number(selectedStudent.friend_status.sender_id) === Number(user.id) ? "Request sent" : "Request received") : "Add friend"}</button><button type="button" className="campus-map-profile-secondary" onClick={() => onNavigate?.("Friends & Messages")}><MessageCircle size={16}/> Message</button></div>
+            <div className="campus-map-profile-actions">
+              {Number(selectedStudent.id) !== Number(user.id) && selectedStudent.friend_status?.status === "pending" && Number(selectedStudent.friend_status.sender_id) !== Number(user.id) ? <>
+                <button type="button" className="campus-map-profile-primary" disabled={friendBusy} onClick={() => updateFriendRequest("accept")}><UserCheck size={16}/>{friendBusy ? "Updating…" : "Accept request"}</button>
+                <button type="button" className="campus-map-profile-secondary" disabled={friendBusy} onClick={() => updateFriendRequest("decline")}><UserX size={16}/> Decline</button>
+              </> : Number(selectedStudent.id) !== Number(user.id) && selectedStudent.friend_status?.status === "pending" ? <>
+                <button type="button" className="campus-map-profile-primary" disabled><UserPlus size={16}/> Request sent</button>
+                <button type="button" className="campus-map-profile-secondary" disabled={friendBusy} onClick={() => updateFriendRequest("cancel")}>Cancel request</button>
+              </> : Number(selectedStudent.id) !== Number(user.id) ? <button type="button" className="campus-map-profile-primary" disabled={friendBusy || selectedStudent.friend_status?.status === "accepted"} onClick={() => updateFriendRequest("send")}><UserPlus size={16}/>{friendBusy ? "Sending…" : selectedStudent.friend_status?.status === "accepted" ? "Already friends" : "Add friend"}</button> : null}
+              {Number(selectedStudent.id) !== Number(user.id) && <button type="button" className="campus-map-profile-secondary" onClick={() => onNavigate?.("Friends & Messages")}><MessageCircle size={16}/> Message</button>}
+            </div>
           </>}
         </section>
       </div>}
