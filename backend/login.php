@@ -70,6 +70,13 @@ try {
         exit;
     }
 
+    // Upgrade older password hashes transparently after a successful login.
+    if (password_needs_rehash($user["password_hash"], PASSWORD_DEFAULT)) {
+        $newHash = password_hash($password, PASSWORD_DEFAULT);
+        $rehash = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $rehash->execute([$newHash, $user["id"]]);
+    }
+
     session_regenerate_id(true);
 
     $_SESSION["user_id"] = $user["id"];
