@@ -584,7 +584,7 @@ function App() {
 
           {/* DISCOVER STUDENTS PAGE */}
           {activePage === "Live Campus Map" ? (
-            <CampusMapPage user={user} />
+            <CampusMapPage user={user} onNavigate={setActivePage} />
 
           ) : activePage === "Friends & Messages" ? (
             <SocialPage currentUserId={user.id} />
