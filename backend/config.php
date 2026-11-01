@@ -23,7 +23,7 @@ if ($origin !== "" && in_array($origin, $allowedOrigins, true)) {
 }
 
 header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token");
 header("Content-Type: application/json; charset=UTF-8");
 header("Cache-Control: no-store, private, max-age=0");
 header("Pragma: no-cache");
@@ -77,4 +77,19 @@ if (session_status() === PHP_SESSION_NONE) {
     ]);
 
     session_start();
+}
+
+// Session-bound CSRF protection for authenticated state-changing requests.
+// Login and registration establish a session and are protected by the strict
+// origin allow-list plus the required custom request header.
+if (in_array($requestMethod, ["POST", "PUT", "PATCH", "DELETE"], true)
+    && !in_array(basename($_SERVER["SCRIPT_NAME"] ?? ""), ["login.php", "register.php"], true)) {
+    $sessionToken = $_SESSION["csrf_token"] ?? "";
+    $requestToken = $_SERVER["HTTP_X_CSRF_TOKEN"] ?? "";
+    if (!is_string($sessionToken) || $sessionToken === "" ||
+        !is_string($requestToken) || !hash_equals($sessionToken, $requestToken)) {
+        http_response_code(403);
+        echo json_encode(["success" => false, "message" => "Your security session expired. Refresh the page and try again."]);
+        exit;
+    }
 }
