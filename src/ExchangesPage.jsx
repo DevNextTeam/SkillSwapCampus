@@ -456,6 +456,20 @@ function ExchangesPage() {
 
                 )}
 
+                {exchange.status === "accepted" && (
+                  <div className="exchange-actions">
+                    <button
+                      type="button"
+                      className="exchange-accept-button"
+                      onClick={() => handleResponse(exchange.id, "completed")}
+                      disabled={updatingId !== null}
+                    >
+                      <CheckCircle2 size={16} />
+                      {isUpdating ? "Updating..." : "Mark as completed"}
+                    </button>
+                  </div>
+                )}
+
               </article>
             );
           })}
