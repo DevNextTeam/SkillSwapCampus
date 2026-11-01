@@ -33,6 +33,14 @@ if (!is_array($data)) {
     exit;
 }
 
+foreach (["skill_name", "category", "skill_type", "description"] as $field) {
+    if (isset($data[$field]) && !is_string($data[$field])) {
+        http_response_code(400);
+        echo json_encode(["success" => false, "message" => "Please check the skill details and try again."]);
+        exit;
+    }
+}
+
 $id = filter_var($data["id"] ?? null, FILTER_VALIDATE_INT);
 $skillName = trim($data["skill_name"] ?? "");
 $category = trim($data["category"] ?? "");
@@ -58,9 +66,9 @@ if (!in_array($skillType, ["offer", "learn"], true)) {
 }
 
 if (
-    strlen($skillName) > 100 ||
-    strlen($category) > 100 ||
-    strlen($description) > 5000
+    (function_exists("mb_strlen") ? mb_strlen($skillName, "UTF-8") : strlen($skillName)) > 100 ||
+    (function_exists("mb_strlen") ? mb_strlen($category, "UTF-8") : strlen($category)) > 100 ||
+    (function_exists("mb_strlen") ? mb_strlen($description, "UTF-8") : strlen($description)) > 5000
 ) {
     http_response_code(400);
     echo json_encode([
