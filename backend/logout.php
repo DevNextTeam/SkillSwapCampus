@@ -3,6 +3,13 @@
 
 require_once "config.php";
 
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    http_response_code(405);
+    header("Allow: POST");
+    echo json_encode(["success" => false, "message" => "Only POST requests are allowed."]);
+    exit;
+}
+
 $_SESSION = [];
 
 if (ini_get("session.use_cookies")) {
