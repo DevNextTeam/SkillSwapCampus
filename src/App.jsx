@@ -312,7 +312,7 @@ function App() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [showStartupSplash]);
 
   // LOG OUT.
   async function handleLogout() {
