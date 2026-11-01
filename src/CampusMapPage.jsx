@@ -100,6 +100,7 @@ export default function CampusMapPage({ user, onNavigate }) {
 
   useEffect(() => {
     let alive = true;
+    const markers = markersRef.current;
     loadLeaflet().then((L) => {
       if (!alive || !mapElement.current || mapRef.current) return;
       const map = L.map(mapElement.current, { zoomControl: true }).setView([12.8797, 121.774], 6);
@@ -114,18 +115,18 @@ export default function CampusMapPage({ user, onNavigate }) {
     return () => {
       alive = false;
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
-      markersRef.current.clear();
+      markers.clear();
     };
   }, []);
 
   useEffect(() => {
-    loadLocations();
+    const initialLoad = window.setTimeout(() => { loadLocations(); }, 0);
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible") loadLocations();
     }, 12000);
     const refresh = () => { if (document.visibilityState === "visible") loadLocations(); };
     window.addEventListener("focus", refresh);
-    return () => { window.clearInterval(timer); window.removeEventListener("focus", refresh); };
+    return () => { window.clearTimeout(initialLoad); window.clearInterval(timer); window.removeEventListener("focus", refresh); };
   }, [loadLocations]);
 
   useEffect(() => {
@@ -155,7 +156,7 @@ export default function CampusMapPage({ user, onNavigate }) {
         markersRef.current.set(id, marker);
       }
     });
-  }, [visibleLocations, mapReady, user.id]);
+  }, [visibleLocations, locations, mapReady, user.id]);
 
   const stopSharing = useCallback(async (announce = true) => {
     if (watchRef.current !== null && navigator.geolocation) navigator.geolocation.clearWatch(watchRef.current);
