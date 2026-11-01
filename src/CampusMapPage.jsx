@@ -269,6 +269,18 @@ export default function CampusMapPage({ user, onNavigate }) {
           <div className="campus-map-privacy"><ShieldCheck size={17}/><span>Only signed-in students can see shared locations. Locations expire automatically after two minutes without an update.</span></div>
         </aside>
       </section>
+      {selectedStudent && <div className="campus-map-modal-backdrop" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStudent(null); }}>
+        <section className="campus-map-profile-modal" role="dialog" aria-modal="true" aria-label="Student profile">
+          <button type="button" className="campus-map-modal-close" onClick={() => setSelectedStudent(null)} aria-label="Close"><X size={19}/></button>
+          {profileLoading ? <p>Loading profile…</p> : <>
+            <div className="campus-map-profile-head"><span className="campus-map-profile-avatar">{selectedStudent.profile_photo ? <img src={API_BASE + "/" + selectedStudent.profile_photo} alt=""/> : initials(selectedStudent.full_name)}</span><div><h3>{selectedStudent.full_name}</h3><p>{selectedStudent.university || "SkillSwap student"}</p><small>{selectedStudent.course || "Course not listed"}{selectedStudent.year_level ? " · Year " + selectedStudent.year_level : ""}</small></div></div>
+            {selectedStudent.bio && <p className="campus-map-profile-bio">{selectedStudent.bio}</p>}
+            <div className="campus-map-profile-skills"><h4><GraduationCap size={16}/> Skills</h4>{selectedStudent.skills?.length ? <div>{selectedStudent.skills.map((skill) => <span key={skill.id}>{skill.skill_name} · {skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}</span>)}</div> : <p>No skills listed yet.</p>}</div>
+            {profileError && <p className="campus-map-error">{profileError}</p>}{profileNotice && <p className="campus-map-notice">{profileNotice}</p>}
+            <div className="campus-map-profile-actions"><button type="button" className="campus-map-profile-primary" disabled={friendBusy || selectedStudent.friend_status?.status === "accepted" || selectedStudent.friend_status?.status === "pending"} onClick={sendFriendRequest}><UserPlus size={16}/>{friendBusy ? "Sending…" : selectedStudent.friend_status?.status === "accepted" ? "Already friends" : selectedStudent.friend_status?.status === "pending" ? (Number(selectedStudent.friend_status.sender_id) === Number(user.id) ? "Request sent" : "Request received") : "Add friend"}</button><button type="button" className="campus-map-profile-secondary" onClick={() => onNavigate?.("Friends & Messages")}><MessageCircle size={16}/> Message</button></div>
+          </>}
+        </section>
+      </div>}
       <p className="campus-map-footnote">Map data © OpenStreetMap contributors. Student locations update while sharing is enabled and this page is open.</p>
     </div>
   );
