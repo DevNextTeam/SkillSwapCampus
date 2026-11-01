@@ -22,6 +22,7 @@ import {
   Pencil,
   Users,
   CheckCircle2,
+  MapPinned,
 } from "lucide-react";
 
 import Auth from "./Auth";
@@ -30,6 +31,7 @@ import ExchangesPage from "./ExchangesPage";
 import SchedulePage from "./SchedulePage";
 import DiscoverStudentsPage from "./DiscoverStudentsPage";
 import SocialPage from "./SocialPage";
+import CampusMapPage from "./CampusMapPage";
 import { apiRequest, API_BASE } from "./api";
 import "./App.css";
 
@@ -38,6 +40,7 @@ const navigation = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "Discover Students", icon: Search },
   { label: "Friends & Messages", icon: Users },
+  { label: "Live Campus Map", icon: MapPinned },
   { label: "Explore Skills", icon: Compass },
   { label: "My Exchanges", icon: ArrowUpRight },
   { label: "My Schedule", icon: CalendarDays },
@@ -580,7 +583,10 @@ function App() {
           </div>
 
           {/* DISCOVER STUDENTS PAGE */}
-          {activePage === "Friends & Messages" ? (
+          {activePage === "Live Campus Map" ? (
+            <CampusMapPage user={user} />
+
+          ) : activePage === "Friends & Messages" ? (
             <SocialPage currentUserId={user.id} />
 
           ) : activePage === "Discover Students" ? (
