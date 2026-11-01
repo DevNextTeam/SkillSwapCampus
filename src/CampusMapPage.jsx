@@ -43,6 +43,7 @@ export default function CampusMapPage({ user }) {
   const markersRef = useRef(new Map());
   const watchRef = useRef(null);
   const lastSentRef = useRef(0);
+  const lastCoordsRef = useRef(null);
   const [sharing, setSharing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [locations, setLocations] = useState([]);
@@ -126,6 +127,7 @@ export default function CampusMapPage({ user }) {
     watchRef.current = null;
     setSharing(false);
     setMyPosition(null);
+    lastCoordsRef.current = null;
     try {
       await apiRequest("live_locations.php", { method: "POST", body: JSON.stringify({ stop: true }) });
       await loadLocations();
@@ -149,6 +151,8 @@ export default function CampusMapPage({ user }) {
     setMessage("Waiting for your browser's location permission…");
     const watchId = navigator.geolocation.watchPosition(async (position) => {
       const coords = position.coords;
+      const nextCoords = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy };
+      lastCoordsRef.current = nextCoords;
       setMyPosition({ latitude: coords.latitude, longitude: coords.longitude });
       setSharing(true);
       setMessage("Your live location is being shared with signed-in campus students.");
@@ -158,7 +162,7 @@ export default function CampusMapPage({ user }) {
       try {
         await apiRequest("live_locations.php", {
           method: "POST",
-          body: JSON.stringify({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }),
+          body: JSON.stringify(nextCoords),
         });
         loadLocations();
       } catch (err) {
@@ -166,6 +170,10 @@ export default function CampusMapPage({ user }) {
       }
     }, (geoError) => {
       setSharing(false);
+      if (watchRef.current !== null) navigator.geolocation.clearWatch(watchRef.current);
+      watchRef.current = null;
+      lastCoordsRef.current = null;
+      apiRequest("live_locations.php", { method: "POST", body: JSON.stringify({ stop: true }) }).then(loadLocations).catch(() => {});
       const reasons = {
         1: "Location permission was denied. Allow location access in your browser settings to share.",
         2: "Your device could not determine your location. Try again somewhere with a clearer GPS signal.",
@@ -177,8 +185,22 @@ export default function CampusMapPage({ user }) {
     watchRef.current = watchId;
   };
 
+  useEffect(() => {
+    if (!sharing) return undefined;
+    const heartbeat = window.setInterval(async () => {
+      if (!lastCoordsRef.current || document.visibilityState !== "visible") return;
+      try {
+        await apiRequest("live_locations.php", { method: "POST", body: JSON.stringify(lastCoordsRef.current) });
+        loadLocations();
+      } catch (err) { setError(err.message || "Your live location update failed."); }
+    }, 30000);
+    return () => window.clearInterval(heartbeat);
+  }, [sharing, loadLocations]);
+
   useEffect(() => () => {
     if (watchRef.current !== null && navigator.geolocation) navigator.geolocation.clearWatch(watchRef.current);
+    // Leaving the map stops live sharing immediately; the server also expires stale records.
+    apiRequest("live_locations.php", { method: "POST", body: JSON.stringify({ stop: true }) }).catch(() => {});
   }, []);
 
   const centerOnMe = () => {
