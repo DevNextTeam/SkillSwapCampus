@@ -16,13 +16,13 @@ if (empty($_SESSION["user_id"])) {
 }
 
 $data = json_decode(file_get_contents("php://input"), true);
-if (!is_array($data)) {
+if (!is_array($data) || !isset($data["exchange_id"]) || !is_scalar($data["exchange_id"])) {
     http_response_code(400);
-    echo json_encode(["success" => false, "message" => "Invalid request data."]);
+    echo json_encode(["success" => false, "message" => "Invalid exchange selection."]);
     exit;
 }
 
-$exchangeId = filter_var($data["exchange_id"] ?? null, FILTER_VALIDATE_INT);
+$exchangeId = filter_var($data["exchange_id"], FILTER_VALIDATE_INT);
 $status = $data["status"] ?? "";
 if (!$exchangeId || $exchangeId < 1 || !in_array($status, ["accepted", "rejected", "completed"], true)) {
     http_response_code(400);
@@ -33,45 +33,84 @@ if (!$exchangeId || $exchangeId < 1 || !in_array($status, ["accepted", "rejected
 $userId = (int) $_SESSION["user_id"];
 
 try {
-    if ($status === "completed") {
-        // Either participant may mark an accepted exchange complete.
-        $stmt = $pdo->prepare(
-            "UPDATE sessions
-             SET status = 'completed'
-             WHERE id = ?
-               AND (requester_id = ? OR receiver_id = ?)
-               AND status = 'accepted'"
-        );
-        $stmt->execute([$exchangeId, $userId, $userId]);
-    } else {
-        // Only the receiving student may accept or reject a pending request.
-        $stmt = $pdo->prepare(
-            "UPDATE sessions
-             SET status = ?
-             WHERE id = ? AND receiver_id = ? AND status = 'pending'"
-        );
-        $stmt->execute([$status, $exchangeId, $userId]);
+    // Serialize decisions for this exact request and verify its current state.
+    $pdo->beginTransaction();
+
+    $lock = $pdo->prepare(
+        "SELECT id, requester_id, receiver_id, status
+         FROM sessions
+         WHERE id = ?
+         LIMIT 1
+         FOR UPDATE"
+    );
+    $lock->execute([$exchangeId]);
+    $exchange = $lock->fetch(PDO::FETCH_ASSOC);
+
+    if (!$exchange) {
+        $pdo->rollBack();
+        http_response_code(404);
+        echo json_encode(["success" => false, "message" => "This exchange request could not be found."]);
+        exit;
     }
 
-    if ($stmt->rowCount() === 0) {
+    $requesterId = (int) $exchange["requester_id"];
+    $receiverId = (int) $exchange["receiver_id"];
+    $currentStatus = $exchange["status"];
+
+    if ($status === "completed") {
+        $authorized = ($requesterId === $userId || $receiverId === $userId)
+            && $currentStatus === "accepted";
+    } else {
+        $authorized = $receiverId === $userId && $currentStatus === "pending";
+    }
+
+    if (!$authorized) {
+        $pdo->rollBack();
         http_response_code(409);
         echo json_encode([
             "success" => false,
-            "message" => $status === "completed"
-                ? "This exchange is no longer active or has already been completed."
-                : "This request has already been answered or you are not authorized to respond."
+            "message" => "This specific request is no longer pending, or you are not allowed to change it.",
+            "exchange_id" => (int) $exchangeId,
+            "current_status" => $currentStatus
         ]);
         exit;
     }
 
+    // The primary-key predicate ensures no other exchange can be changed.
+    $update = $pdo->prepare(
+        "UPDATE sessions
+         SET status = ?
+         WHERE id = ?
+           AND status = ?"
+    );
+    $update->execute([$status, $exchangeId, $currentStatus]);
+
+    if ($update->rowCount() !== 1) {
+        $pdo->rollBack();
+        http_response_code(409);
+        echo json_encode(["success" => false, "message" => "The request changed before your update could be saved. Please refresh."]);
+        exit;
+    }
+
+    $pdo->commit();
+
     $messages = [
-        "accepted" => "Exchange request accepted!",
-        "rejected" => "Exchange request rejected.",
-        "completed" => "Exchange marked as completed. Great work learning together!"
+        "accepted" => "This exchange request was accepted.",
+        "rejected" => "This exchange request was rejected.",
+        "completed" => "This exchange was marked as completed."
     ];
 
-    echo json_encode(["success" => true, "message" => $messages[$status], "status" => $status]);
-} catch (PDOException $e) {
+    echo json_encode([
+        "success" => true,
+        "message" => $messages[$status],
+        "exchange_id" => (int) $exchangeId,
+        "status" => $status
+    ]);
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log("Exchange status update failed for exchange {$exchangeId}: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Unable to update the exchange. Please try again."]);
+    echo json_encode(["success" => false, "message" => "Unable to update this exchange. Please try again."]);
 }
