@@ -55,20 +55,29 @@ export default function CampusMapPage({ user, onNavigate }) {
   const [search, setSearch] = useState("");
   const [universityFilter, setUniversityFilter] = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
+  const [radiusFilter, setRadiusFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("nearest");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [profileNotice, setProfileNotice] = useState("");
   const [friendBusy, setFriendBusy] = useState(false);
 
-  const visibleLocations = locations.filter((student) => {
+  const distanceKm = (a, b) => { const rad = (value) => value * Math.PI / 180; const dLat = rad(Number(b.latitude) - Number(a.latitude)); const dLng = rad(Number(b.longitude) - Number(a.longitude)); const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(Number(a.latitude))) * Math.cos(rad(Number(b.latitude))) * Math.sin(dLng / 2) ** 2; return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); };
+  const matchingLocations = locations.filter((student) => {
     const query = search.trim().toLowerCase();
     const matches = !query || [student.full_name, student.university, student.course].some((value) => (value || "").toLowerCase().includes(query));
-    return matches && (universityFilter === "all" || student.university === universityFilter) && (courseFilter === "all" || student.course === courseFilter);
+    const matchesUniversity = universityFilter === "all" || student.university === universityFilter;
+    const matchesCourse = courseFilter === "all" || student.course === courseFilter;
+    const withinRadius = radiusFilter === "all" || !myPosition || distanceKm(myPosition, student) <= Number(radiusFilter);
+    return matches && matchesUniversity && matchesCourse && withinRadius;
+  });
+  const visibleLocations = [...matchingLocations].sort((a, b) => {
+    if (sortOrder === "nearest" && myPosition) return distanceKm(myPosition, a) - distanceKm(myPosition, b);
+    return (a.full_name || "").localeCompare(b.full_name || "");
   });
   const universities = [...new Set(locations.map((student) => student.university).filter(Boolean))].sort();
   const courses = [...new Set(locations.map((student) => student.course).filter(Boolean))].sort();
-  const distanceKm = (a, b) => { const rad = (value) => value * Math.PI / 180; const dLat = rad(Number(b.latitude) - Number(a.latitude)); const dLng = rad(Number(b.longitude) - Number(a.longitude)); const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(Number(a.latitude))) * Math.cos(rad(Number(b.latitude))) * Math.sin(dLng / 2) ** 2; return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); };
 
   const openStudentProfile = async (student) => {
     setSelectedStudent({ id: student.user_id, full_name: student.full_name, university: student.university, course: student.course, profile_photo: student.profile_photo });
@@ -263,7 +272,7 @@ export default function CampusMapPage({ user, onNavigate }) {
       </section>
       {message && <p className="campus-map-notice" role="status">{message}</p>}
       {error && <p className="campus-map-error" role="alert"><AlertCircle size={16} />{error}</p>}
-      <section className="campus-map-discovery"><div className="campus-map-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, university, or course" aria-label="Search students"/></div><select value={universityFilter} onChange={(event) => setUniversityFilter(event.target.value)} aria-label="Filter university"><option value="all">All universities</option>{universities.map((name) => <option key={name} value={name}>{name}</option>)}</select><select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} aria-label="Filter course"><option value="all">All courses</option>{courses.map((name) => <option key={name} value={name}>{name}</option>)}</select><span>{visibleLocations.length} students</span></section>
+      <section className="campus-map-discovery"><div className="campus-map-search"><Search size={17}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, university, or course" aria-label="Search students"/></div><select value={universityFilter} onChange={(event) => setUniversityFilter(event.target.value)} aria-label="Filter university"><option value="all">All universities</option>{universities.map((name) => <option key={name} value={name}>{name}</option>)}</select><select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} aria-label="Filter course"><option value="all">All courses</option>{courses.map((name) => <option key={name} value={name}>{name}</option>)}</select><select value={radiusFilter} onChange={(event) => setRadiusFilter(event.target.value)} aria-label="Filter distance" disabled={!myPosition}><option value="all">Any distance</option><option value="1">Within 1 km</option><option value="5">Within 5 km</option><option value="10">Within 10 km</option></select><select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} aria-label="Sort students"><option value="nearest">Nearest first</option><option value="name">Name A–Z</option></select><span>{visibleLocations.length} of {locations.length} students</span></section>
       <section className="campus-map-layout">
         <div className="campus-map-canvas-wrap"><div ref={mapElement} className="campus-map-canvas" aria-label="Live map of students sharing their location" />{!mapReady && <div className="campus-map-loading">Loading interactive map…</div>}</div>
         <aside className="campus-map-roster"><div className="campus-map-roster-heading"><div><h3>Students nearby</h3><p>Live location sharing</p></div><Users size={19} /></div>
