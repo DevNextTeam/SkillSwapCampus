@@ -36,9 +36,14 @@ try {
         exit;
     }
 
+    if (empty($_SESSION["csrf_token"])) {
+        $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+    }
+
     echo json_encode([
         "success" => true,
-        "user" => $user
+        "user" => $user,
+        "csrf_token" => $_SESSION["csrf_token"]
     ]);
 
 } catch (PDOException $e) {
