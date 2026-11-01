@@ -15,6 +15,8 @@ if (empty($_SESSION["user_id"])) {
 }
 
 $me = (int) $_SESSION["user_id"];
+// Release PHP's session lock before notification queries to avoid blocking chat requests.
+session_write_close();
 $items = [];
 try {
     $stmt = $pdo->prepare("SELECT fr.id, u.full_name, fr.created_at FROM friend_requests fr JOIN users u ON u.id = fr.sender_id WHERE fr.receiver_id = ? AND fr.status = 'pending' ORDER BY fr.created_at DESC LIMIT 20");
