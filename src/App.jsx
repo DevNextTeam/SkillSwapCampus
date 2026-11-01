@@ -21,6 +21,7 @@ import {
   Save,
   Pencil,
   Users,
+  CheckCircle2,
 } from "lucide-react";
 
 import Auth from "./Auth";
@@ -176,6 +177,10 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardRequestedSkills, setDashboardRequestedSkills] = useState([]);
+  const [dashboardRequestingId, setDashboardRequestingId] = useState(null);
+  const [dashboardExchangeNotice, setDashboardExchangeNotice] = useState("");
+  const [dashboardExchangeNoticeType, setDashboardExchangeNoticeType] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
@@ -190,7 +195,11 @@ function App() {
     async function loadDashboardSkills() {
       try {
         const result = await apiRequest("get_skills.php");
-        if (active) setDashboardSkills(result.skills || []);
+        if (active) {
+          const loadedSkills = result.skills || [];
+          setDashboardSkills(loadedSkills);
+          setDashboardRequestedSkills(loadedSkills.filter((skill) => Number(skill.has_requested) === 1).map((skill) => Number(skill.id)));
+        }
       } catch (error) {
         console.error("Unable to load dashboard skills:", error);
         if (active) setDashboardSkills([]);
@@ -201,6 +210,27 @@ function App() {
     loadDashboardSkills();
     return () => { active = false; };
   }, []);
+
+  async function requestDashboardExchange(skill) {
+    if (dashboardRequestingId !== null) return;
+    setDashboardRequestingId(Number(skill.id));
+    setDashboardExchangeNotice("");
+    setDashboardExchangeNoticeType("");
+    try {
+      const result = await apiRequest("request_exchange.php", {
+        method: "POST",
+        body: JSON.stringify({ skill_id: skill.id }),
+      });
+      setDashboardRequestedSkills((previous) => [...new Set([...previous, Number(skill.id)])]);
+      setDashboardExchangeNotice(result.message || "Exchange request sent successfully!");
+      setDashboardExchangeNoticeType("success");
+    } catch (error) {
+      setDashboardExchangeNotice(error.message || "Unable to send your exchange request.");
+      setDashboardExchangeNoticeType("error");
+    } finally {
+      setDashboardRequestingId(null);
+    }
+  }
 
   async function loadNotifications() {
     setNotificationsLoading(true);
@@ -630,6 +660,7 @@ function App() {
                     Explore all <ArrowUpRight size={16} />
                   </button>
                 </div>
+                {dashboardExchangeNotice && <div className={`dashboard-exchange-notice ${dashboardExchangeNoticeType}`} role="status">{dashboardExchangeNotice}</div>}
                 {dashboardLoading ? (
                   <div className="skills-empty"><p>Loading recent skill posts...</p></div>
                 ) : dashboardSkills.length === 0 ? (
@@ -659,6 +690,20 @@ function App() {
                             <span>{skill.university || "Campus member"}</span>
                           </div>
                         </div>
+                        {skill.skill_type === "offer" && Number(skill.user_id) !== Number(user.id) && (() => {
+                          const requested = dashboardRequestedSkills.includes(Number(skill.id));
+                          const requesting = dashboardRequestingId === Number(skill.id);
+                          return (
+                            <button
+                              type="button"
+                              className={`dashboard-exchange-button ${requested ? "is-requested" : ""}`}
+                              onClick={() => requestDashboardExchange(skill)}
+                              disabled={requested || requesting}
+                            >
+                              {requested ? <><CheckCircle2 size={16} /> Request sent</> : requesting ? "Sending request..." : <>Request skill exchange <ArrowUpRight size={16} /></>}
+                            </button>
+                          );
+                        })()}
                       </article>
                     ))}
                   </div>
