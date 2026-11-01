@@ -26,7 +26,9 @@ try {
     $stmt = $pdo->prepare("SELECT m.id, m.sender_id, u.full_name, m.body, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id WHERE m.receiver_id = ? AND m.read_at IS NULL ORDER BY m.created_at DESC LIMIT 30");
     $stmt->execute([$me]);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $preview = mb_substr($row["body"], 0, 90);
+        $preview = function_exists("mb_substr")
+            ? mb_substr($row["body"], 0, 90, "UTF-8")
+            : substr($row["body"], 0, 90);
         $items[] = ["id" => "message-" . $row["id"], "type" => "message", "title" => "New message from " . $row["full_name"], "message" => $preview, "created_at" => $row["created_at"]];
     }
 
