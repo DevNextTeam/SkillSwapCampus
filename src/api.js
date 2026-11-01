@@ -10,6 +10,7 @@ export async function apiRequest(endpoint, options = {}) {
       ...((typeof FormData !== "undefined" && options.body instanceof FormData)
         ? {}
         : { "Content-Type": "application/json" }),
+      "X-Requested-With": "XMLHttpRequest",
       ...options.headers,
     },
   });
