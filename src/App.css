@@ -2862,3 +2862,51 @@ body { background: var(--background); color: var(--text); }
 }
 
 .splash-audio-hint { margin-top:14px; color:#e5e0ff; font-size:11px; letter-spacing:.2px; opacity:.85; }
+
+
+/* Dashboard recent-skill exchange action */
+.dashboard-exchange-button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #587b61;
+  border-radius: 11px;
+  background: #587b61;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.dashboard-exchange-button:hover:not(:disabled) {
+  background: #42664c;
+  border-color: #42664c;
+  transform: translateY(-1px);
+}
+.dashboard-exchange-button.is-requested,
+.dashboard-exchange-button:disabled {
+  border-color: #d7e5d5;
+  background: #edf4eb;
+  color: #42664c;
+  opacity: 1;
+  cursor: default;
+}
+.dashboard-exchange-notice {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border: 1px solid #d8e7d5;
+  border-radius: 10px;
+  background: #f0f6ee;
+  color: #365b3d;
+  font-size: 13px;
+  font-weight: 650;
+}
+.dashboard-exchange-notice.error {
+  border-color: #f0d2ce;
+  background: #fff4f2;
+  color: #9b3932;
+}
