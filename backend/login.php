@@ -24,8 +24,21 @@ if (!is_array($data)) {
     exit;
 }
 
-$email = trim($data["email"] ?? "");
-$password = $data["password"] ?? "";
+if (!isset($data["email"], $data["password"]) ||
+    !is_string($data["email"]) || !is_string($data["password"])) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Please enter a valid email and password."]);
+    exit;
+}
+
+$email = trim($data["email"]);
+$password = $data["password"];
+
+if (strlen($email) > 150 || strlen($password) > 72) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Email or password is too long."]);
+    exit;
+}
 
 if ($email === "" || $password === "") {
     http_response_code(400);
