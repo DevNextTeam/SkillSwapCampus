@@ -4,7 +4,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") { http_response_code(405); echo json_
 if (empty($_SESSION["user_id"])) { http_response_code(401); echo json_encode(["success"=>false,"message"=>"Please log in first."]); exit; }
 if (!isset($_FILES["photo"]) || $_FILES["photo"]["error"] !== UPLOAD_ERR_OK) { http_response_code(400); echo json_encode(["success"=>false,"message"=>"Choose a photo to upload."]); exit; }
 $file=$_FILES["photo"];
-if ($file["size"] > 3*1024*1024) { http_response_code(400); echo json_encode(["success"=>false,"message"=>"Photo must be 3 MB or smaller."]); exit; }
+if (!is_uploaded_file($file["tmp_name"]) || (int)$file["size"] < 1) {
+    http_response_code(400);
+    echo json_encode(["success"=>false,"message"=>"The uploaded photo could not be verified. Please try again."]);
+    exit;
+}
+if ($file["size"] > 3*1024*1024) { http_response_code(413); echo json_encode(["success"=>false,"message"=>"Photo must be 3 MB or smaller."]); exit; }
 $finfo=new finfo(FILEINFO_MIME_TYPE); $mime=$finfo->file($file["tmp_name"]);
 $extensions=["image/jpeg"=>"jpg","image/png"=>"png","image/webp"=>"webp"];
 if (!isset($extensions[$mime]) || @getimagesize($file["tmp_name"])===false) { http_response_code(400); echo json_encode(["success"=>false,"message"=>"Use a valid JPG, PNG, or WebP image."]); exit; }
