@@ -2459,3 +2459,39 @@ button:disabled {
   object-fit: contain;
   padding: 3px;
 }
+
+
+/* Expired meeting schedule state */
+.schedule-expired-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 0 0 17px;
+  padding: 14px 15px;
+  border: 1px solid #f2c6c3;
+  border-radius: 13px;
+  background: #fff3f2;
+  color: #a33c36;
+}
+
+.schedule-expired-notice > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.schedule-expired-notice > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.schedule-expired-notice strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.schedule-expired-notice span {
+  color: #87433f;
+  font-size: 12px;
+  line-height: 1.55;
+}
