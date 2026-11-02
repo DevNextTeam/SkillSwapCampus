@@ -36,7 +36,6 @@ export default function DiscoverStudentsPage({ currentUserId }) {
   const [messageText, setMessageText] = useState("");
   const [conversation, setConversation] = useState([]);
   const [exchangeSubmitting, setExchangeSubmitting] = useState({});
-  const [exchangeRequested, setExchangeRequested] = useState({});
 
   async function openStudent(student) {
     setSelected(student); setShowProfilePage(false); setDetailLoading(true); setNotice(""); setConversation([]);
