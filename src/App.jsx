@@ -48,6 +48,19 @@ const navigation = [
 ];
 
 // STUDENT PROFILE COMPONENT
+function formatSkillTimeAgo(createdAt, now = Date.now()) {
+  if (!createdAt) return "Recently";
+  const timestamp = new Date(String(createdAt).replace(" ", "T")).getTime();
+  if (!Number.isFinite(timestamp)) return "Recently";
+  const minutes = Math.max(0, Math.floor((now - timestamp) / 60000));
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 function ProfilePage({ user, onProfileUpdated }) {
   const [form, setForm] = useState({
     full_name: user.full_name || "",
@@ -180,6 +193,7 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardClock, setDashboardClock] = useState(() => Date.now());
   const [dashboardExchanges, setDashboardExchanges] = useState([]);
   const [dashboardFriends, setDashboardFriends] = useState([]);
   const [dashboardOverviewLoading, setDashboardOverviewLoading] = useState(true);
@@ -199,7 +213,10 @@ function App() {
 
   useEffect(() => {
     let active = true;
+    let requestInFlight = false;
     async function loadDashboardSkills() {
+      if (requestInFlight) return;
+      requestInFlight = true;
       try {
         const result = await apiRequest("get_skills.php");
         if (active) {
@@ -211,11 +228,23 @@ function App() {
         console.error("Unable to load dashboard skills:", error);
         if (active) setDashboardSkills([]);
       } finally {
+        requestInFlight = false;
         if (active) setDashboardLoading(false);
       }
     }
+    const refresh = () => {
+      if (document.visibilityState === "visible") loadDashboardSkills();
+    };
     loadDashboardSkills();
-    return () => { active = false; };
+    const refreshTimer = window.setInterval(refresh, 15000);
+    const clockTimer = window.setInterval(() => setDashboardClock(Date.now()), 30000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      active = false;
+      window.clearInterval(refreshTimer);
+      window.clearInterval(clockTimer);
+      window.removeEventListener("focus", refresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -798,12 +827,15 @@ function App() {
                 {dashboardExchangeNotice && <div className={`dashboard-exchange-notice ${dashboardExchangeNoticeType}`} role="status">{dashboardExchangeNotice}</div>}
                 {!dashboardLoading && dashboardSkills.length > 0 && (
                   <div className="database-skills-grid">
-                    {dashboardSkills.slice(0, 6).map((skill) => (
+                    {dashboardSkills.slice(0, 3).map((skill) => (
                       <article className="database-skill-card" key={skill.id}>
                         <div className="database-skill-top">
                           <span className={`database-skill-type ${skill.skill_type === "offer" ? "type-offer" : "type-learn"}`}>
                             {skill.skill_type === "offer" ? "Can teach" : "Wants to learn"}
                           </span>
+                          <time className="dashboard-skill-age" dateTime={skill.created_at || undefined}>
+                            {formatSkillTimeAgo(skill.created_at, dashboardClock)}
+                          </time>
                         </div>
                         <h3>{skill.skill_name}</h3>
                         <span className="database-skill-category">{skill.category || "General"}</span>
