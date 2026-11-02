@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"]==="GET") {
  try {
   $q=$pdo->prepare("SELECT id FROM friend_requests WHERE status='accepted' AND ((sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?)) LIMIT 1"); $q->execute([$me,$other,$other,$me]);
   if (!$q->fetch()) { http_response_code(403); echo json_encode(["success"=>false,"message"=>"You can message students after becoming friends."]); exit; }
-  $q=$pdo->prepare("SELECT id,sender_id,receiver_id,body,created_at,read_at FROM messages WHERE (sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?) ORDER BY id DESC LIMIT 100");
+  $q=$pdo->prepare("SELECT id,sender_id,receiver_id,body,attachment_name,attachment_mime,attachment_size,created_at,read_at FROM messages WHERE (sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?) ORDER BY id DESC LIMIT 100");
   $q->execute([$me,$other,$other,$me]); $messages=array_reverse($q->fetchAll(PDO::FETCH_ASSOC));
   $q=$pdo->prepare("UPDATE messages SET read_at=NOW() WHERE sender_id=? AND receiver_id=? AND read_at IS NULL"); $q->execute([$other,$me]);
   echo json_encode(["success"=>true,"messages"=>$messages]);
