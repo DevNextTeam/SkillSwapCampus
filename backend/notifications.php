@@ -18,6 +18,7 @@ $me = (int) $_SESSION["user_id"];
 // Release PHP's session lock before notification queries to avoid blocking chat requests.
 session_write_close();
 $items = [];
+
 try {
     $stmt = $pdo->prepare("SELECT fr.id, u.full_name, fr.created_at FROM friend_requests fr JOIN users u ON u.id = fr.sender_id WHERE fr.receiver_id = ? AND fr.status = 'pending' ORDER BY fr.created_at DESC LIMIT 20");
     $stmt->execute([$me]);
@@ -40,9 +41,47 @@ try {
         $items[] = ["id" => "exchange-" . $row["id"], "type" => "exchange", "title" => "New skill exchange request", "message" => $row["full_name"] . " requested " . $row["skill_name"] . ".", "created_at" => $row["created_at"]];
     }
 
-    usort($items, static function ($a, $b) { return strtotime($b["created_at"]) <=> strtotime($a["created_at"]); });
+    // Notify the student who did not create the latest proposal. The pending
+    // state naturally clears this notification after the proposal is answered.
+    $stmt = $pdo->prepare(
+        "SELECT s.id, s.scheduled_at, s.meeting_location, s.created_at,
+                proposer.full_name AS proposer_name, sk.skill_name
+         FROM sessions s
+         INNER JOIN skills sk ON sk.id = s.skill_id
+         INNER JOIN users proposer ON proposer.id = s.schedule_proposed_by
+         WHERE (s.requester_id = ? OR s.receiver_id = ?)
+           AND s.status = 'accepted'
+           AND s.schedule_status = 'pending'
+           AND s.schedule_proposed_by <> ?
+         ORDER BY s.scheduled_at ASC
+         LIMIT 20"
+    );
+    $stmt->execute([$me, $me, $me]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $dateLabel = $row["scheduled_at"]
+            ? date("M j, Y g:i A", strtotime($row["scheduled_at"]))
+            : "a meeting time";
+        $locationLabel = trim((string) ($row["meeting_location"] ?? ""));
+        $message = $row["proposer_name"] . " proposed " . $dateLabel . " for " . $row["skill_name"];
+        if ($locationLabel !== "") {
+            $message .= " at " . $locationLabel;
+        }
+        $items[] = [
+            "id" => "schedule-" . $row["id"],
+            "type" => "schedule",
+            "title" => "New learning session proposal",
+            "message" => $message . ".",
+            "created_at" => $row["created_at"]
+        ];
+    }
+
+    usort($items, static function ($a, $b) {
+        return strtotime($b["created_at"]) <=> strtotime($a["created_at"]);
+    });
+
     echo json_encode(["success" => true, "notifications" => array_slice($items, 0, 40)]);
-} catch (PDOException $e) {
+} catch (Throwable $e) {
+    error_log("Notification retrieval failed for user {$me}: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Unable to load notifications."]);
 }
