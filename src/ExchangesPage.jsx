@@ -19,11 +19,11 @@ import {
 import { apiRequest } from "./api";
 import "./ExchangesPage.css";
 
-function ExchangesPage({ onNavigate }) {
+function ExchangesPage({ onNavigate, initialStatus = "all" }) {
   const [exchanges, setExchanges] = useState([]);
   const latestLoadId = useRef(0);
   const [activeTab, setActiveTab] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
