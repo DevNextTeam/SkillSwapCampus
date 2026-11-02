@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   Clock,
@@ -35,6 +35,7 @@ function getLocalDateTimeValue() {
 
 function SchedulePage({ user }) {
   const [sessions, setSessions] = useState([]);
+  const scheduleLoadId = useRef(0);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
   const [respondingId, setRespondingId] = useState(null);
@@ -49,28 +50,36 @@ function SchedulePage({ user }) {
   });
 
   async function loadSchedule(showLoading = true) {
+    const loadId = ++scheduleLoadId.current;
     if (showLoading) setLoading(true);
 
     try {
       const result = await apiRequest("get_exchanges.php");
+      if (loadId !== scheduleLoadId.current) return;
 
       const acceptedSessions = (result.exchanges || []).filter(
         (exchange) => exchange.status === "accepted"
       );
 
       setSessions(acceptedSessions);
+      setMessage("");
+      setMessageType("");
     } catch (error) {
+      if (loadId !== scheduleLoadId.current) return;
       setMessage(error.message || "Unable to load your schedule.");
       setMessageType("error");
     } finally {
-      setLoading(false);
+      if (loadId === scheduleLoadId.current) setLoading(false);
     }
   }
 
   useEffect(() => {
     let active = true;
     Promise.resolve().then(() => { if (active) loadSchedule(); });
-    return () => { active = false; };
+    return () => {
+      active = false;
+      scheduleLoadId.current += 1;
+    };
   }, []);
 
   function startEditing(session) {
