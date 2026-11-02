@@ -31,7 +31,7 @@ header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: DENY");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 // Allow the first-party app to request browser geolocation after an explicit student action.
-header("Permissions-Policy: camera=(), microphone=(), geolocation=(self)");
+header("Permissions-Policy: camera=(self), microphone=(), geolocation=(self)");
 
 // Preflight requests must be answered before session startup.
 if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
