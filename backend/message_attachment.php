@@ -5,6 +5,7 @@ if (empty($_SESSION["user_id"])) { http_response_code(401); echo json_encode(["s
 $me=(int)$_SESSION["user_id"];
 session_write_close();
 function failAttachment($code,$message){http_response_code($code);echo json_encode(["success"=>false,"message"=>$message]);exit;}
+function iniBytes($value){$value=trim((string)$value);if($value==="")return 0;$unit=strtolower(substr($value,-1));$number=(float)$value;switch($unit){case "g":$number*=1024;case "m":$number*=1024;case "k":$number*=1024;}return (int)$number;}
 function ensureFriends($pdo,$me,$other){
  $q=$pdo->prepare("SELECT id FROM friend_requests WHERE status='accepted' AND ((sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?)) LIMIT 1");
  $q->execute([$me,$other,$other,$me]); return (bool)$q->fetchColumn();
@@ -26,12 +27,17 @@ if($_SERVER["REQUEST_METHOD"]==="GET"){
  }catch(PDOException $e){failAttachment(500,"Unable to load attachment.");}
 }
 if($_SERVER["REQUEST_METHOD"]!=="POST")failAttachment(405,"Method not allowed.");
+$contentLength=(int)($_SERVER["CONTENT_LENGTH"]??0);$postLimit=iniBytes(ini_get("post_max_size"));
+if($postLimit>0&&$contentLength>$postLimit)failAttachment(413,"This file exceeds the server upload limit. Increase PHP post_max_size and upload_max_filesize, then restart Apache.");
 $other=filter_var($_POST["user_id"]??null,FILTER_VALIDATE_INT);
 if(!$other||$other===$me)failAttachment(400,"Invalid conversation.");
 if(!ensureFriends($pdo,$me,$other))failAttachment(403,"You can share attachments after becoming friends.");
-if(empty($_FILES["file"])||!is_uploaded_file($_FILES["file"]["tmp_name"]))failAttachment(400,"Choose a file to send.");
+$rawBody=$_POST["body"]??"";$body=is_string($rawBody)?trim($rawBody):"";
+if((function_exists("mb_strlen")?mb_strlen($body,"UTF-8"):strlen($body))>4000)failAttachment(400,"Message text must be 4,000 characters or fewer.");
+if(empty($_FILES["file"])||!is_array($_FILES["file"]))failAttachment(400,"No file was received. Check that the file is within the server upload limit and try again.");
 $file=$_FILES["file"];
-if($file["error"]!==UPLOAD_ERR_OK)failAttachment(400,"The upload did not complete. Please try again.");
+if($file["error"]!==UPLOAD_ERR_OK){$uploadErrors=[UPLOAD_ERR_INI_SIZE=>"The file is larger than PHP upload_max_filesize. Increase it and restart Apache.",UPLOAD_ERR_FORM_SIZE=>"The file is larger than the form upload limit.",UPLOAD_ERR_PARTIAL=>"The file upload was interrupted. Please try again.",UPLOAD_ERR_NO_FILE=>"Choose a file to send.",UPLOAD_ERR_NO_TMP_DIR=>"The server upload temporary folder is missing.",UPLOAD_ERR_CANT_WRITE=>"The server could not save the uploaded file.",UPLOAD_ERR_EXTENSION=>"A PHP extension stopped the upload."];failAttachment(in_array($file["error"],[UPLOAD_ERR_INI_SIZE,UPLOAD_ERR_FORM_SIZE],true)?413:400,$uploadErrors[$file["error"]]??"The upload did not complete. Please try again.");}
+if(!is_uploaded_file($file["tmp_name"]))failAttachment(400,"The uploaded file could not be verified.");
 $max=10*1024*1024;
 if($file["size"]<1||$file["size"]>$max)failAttachment(413,"Files must be 10 MB or smaller.");
 $finfo=new finfo(FILEINFO_MIME_TYPE);$mime=$finfo->file($file["tmp_name"]);
@@ -52,7 +58,7 @@ $stored=bin2hex(random_bytes(20)).".".$allowed[$mime];$dir=__DIR__."/uploads/mes
 if(!is_dir($dir)&&!mkdir($dir,0750,true)&&!is_dir($dir))failAttachment(500,"Unable to prepare secure file storage.");
 if(!move_uploaded_file($file["tmp_name"],$dir."/".$stored))failAttachment(500,"Unable to save the attachment.");
 try{
- $q=$pdo->prepare("INSERT INTO messages(sender_id,receiver_id,body,attachment_path,attachment_name,attachment_mime,attachment_size) VALUES(?,?, '',?,?,?,?)");
- $q->execute([$me,$other,$stored,$original,$mime,(int)$file["size"]]);
+ $q=$pdo->prepare("INSERT INTO messages(sender_id,receiver_id,body,attachment_path,attachment_name,attachment_mime,attachment_size) VALUES(?,?,?,?,?,?,?)");
+ $q->execute([$me,$other,$body,$stored,$original,$mime,(int)$file["size"]]);
  echo json_encode(["success"=>true,"message"=>"Attachment sent.","id"=>(int)$pdo->lastInsertId()]);
 }catch(PDOException $e){@unlink($dir."/".$stored);error_log("Message attachment insert failed: ".$e->getMessage());failAttachment(500,"Unable to send the attachment.");}
