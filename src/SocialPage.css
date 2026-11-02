@@ -27,3 +27,70 @@
 .social-chat-panel{min-width:0;max-width:100%}.social-messages{min-width:0;overflow-x:hidden}.social-bubble{min-width:0;max-width:min(82%,520px);overflow-wrap:anywhere}.social-bubble p{white-space:pre-wrap;overflow-wrap:anywhere}
 .social-compose{display:grid;gap:8px}.social-compose-row{display:flex;align-items:center;gap:7px;min-width:0}.social-compose-row>input:not([type=file]){flex:1;min-width:0}.social-attach-button{width:38px;height:38px;flex:none;display:grid;place-items:center;border:1px solid #e2e9e1;border-radius:10px;background:#f7faf6;color:#587b61;cursor:pointer}.social-compose-hint{padding-left:3px;color:#8a968c;font-size:10px}.social-attachment-pending{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 11px;border-radius:9px;background:#eef4ec;color:#4d6b53;font-size:11px}.social-attachment-pending span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.social-attachment-pending button{border:0;background:transparent;color:inherit;cursor:pointer}.social-attachment{display:flex;align-items:center;gap:9px;max-width:100%;margin:4px 0;color:inherit;text-decoration:none}.social-attachment img{display:block;width:min(230px,100%);max-height:220px;object-fit:cover;border-radius:10px}.social-attachment>span:not(.social-file-icon){display:grid;min-width:0;gap:4px}.social-attachment strong{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.social-attachment small{font-size:10px;opacity:.75}.social-file-icon{width:40px;height:44px;display:grid;place-items:center;flex:none;border-radius:8px;background:#e9efe7;color:#54715a}
 @media(max-width:700px){.social-layout,.social-layout.chat-open{grid-template-columns:minmax(0,1fr)}.social-chat-panel{width:100%;min-width:0}.social-chat-header{min-width:0}.social-compose-row{gap:5px}.social-attach-button{width:34px;height:36px}.social-compose-row>button:last-child{width:38px;flex:none}.social-bubble{max-width:90%}}
+
+
+/* Consistent, accessible message composer alignment */
+.social-compose { width:100%; min-width:0; box-sizing:border-box; }
+.social-compose-row {
+  display:grid;
+  grid-template-columns:40px 40px minmax(0,1fr) 44px;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  min-width:0;
+}
+.social-compose-row > .social-attach-button,
+.social-compose-row > .social-send-button {
+  width:100%;
+  height:44px;
+  min-width:0;
+  padding:0;
+  display:grid;
+  place-items:center;
+  flex:none;
+  box-sizing:border-box;
+}
+.social-compose-row > .social-attach-button {
+  border:1px solid #dfe8e1;
+  background:#f5f8f4;
+  color:#52765b;
+}
+.social-compose-row > .social-send-button {
+  border:0;
+  border-radius:11px;
+  background:#16856b;
+  color:#fff;
+  cursor:pointer;
+}
+.social-compose-row > .social-send-button:disabled {
+  background:#a8c8bb;
+  cursor:not-allowed;
+}
+.social-compose-row > input:not([type=file]) {
+  width:100%;
+  height:44px;
+  min-width:0;
+  box-sizing:border-box;
+  padding:0 13px;
+  border:1px solid #dfe8e4;
+  border-radius:11px;
+  background:#fff;
+  font:inherit;
+  font-size:13px;
+}
+.social-compose-row > input:not([type=file]):focus {
+  outline:2px solid #b8ddca;
+  outline-offset:1px;
+}
+.social-compose-hint { display:block; line-height:1.5; }
+.social-attachment-pending { min-width:0; }
+.social-attachment-pending span { min-width:0; overflow-wrap:anywhere; }
+@media(max-width:480px) {
+  .social-compose { padding:11px; gap:8px; }
+  .social-compose-row { grid-template-columns:36px 36px minmax(0,1fr) 40px; gap:6px; }
+  .social-compose-row > .social-attach-button,
+  .social-compose-row > .social-send-button,
+  .social-compose-row > input:not([type=file]) { height:42px; }
+  .social-compose-row > input:not([type=file]) { padding:0 9px; font-size:12px; }
+  .social-compose-hint { padding-left:1px; font-size:10px; }
+}
