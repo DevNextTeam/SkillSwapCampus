@@ -1,4 +1,6 @@
-const DEFAULT_API_BASE = `${window.location.protocol}//${window.location.hostname}/skillswap-campus/backend`;
+const DEFAULT_API_BASE = window.location.hostname === "skillswap-campus.freehosting.dev"
+  ? `${window.location.origin}/backend`
+  : `${window.location.protocol}//${window.location.hostname}/skillswap-campus/backend`;
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE).replace(/\/+$/, "");
 
 const API_URL = API_BASE;
