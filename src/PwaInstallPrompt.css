@@ -1,0 +1,40 @@
+.pwa-install-card,
+.pwa-ios-help {
+  position: fixed;
+  z-index: 1200;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: min(390px, calc(100vw - 32px));
+  padding: 16px 48px 16px 16px;
+  border: 1px solid rgba(7, 91, 219, 0.16);
+  border-radius: 18px;
+  background: #fff;
+  color: #15233b;
+  box-shadow: 0 14px 42px rgba(15, 35, 70, 0.2);
+  font-family: inherit;
+}
+.pwa-install-copy { display: grid; gap: 4px; }
+.pwa-install-copy strong, .pwa-ios-help > strong { font-size: 14px; font-weight: 750; }
+.pwa-install-copy span { color: #617089; font-size: 12px; line-height: 1.45; }
+.pwa-install-action {
+  margin-top: 12px; min-height: 38px; padding: 0 16px; border: 0;
+  border-radius: 10px; background: #075bdb; color: #fff; font: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.pwa-install-close {
+  position: absolute; top: 8px; right: 10px; width: 30px; height: 30px;
+  border: 0; border-radius: 50%; background: #f0f4fa; color: #52627a;
+  font-size: 22px; line-height: 1; cursor: pointer;
+}
+.pwa-ios-install-link {
+  position: fixed; z-index: 1200;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  min-height: 42px; padding: 0 15px; border: 0; border-radius: 999px;
+  background: #075bdb; color: #fff; box-shadow: 0 8px 24px rgba(7, 91, 219, 0.25);
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.pwa-ios-help ol { margin: 12px 0 0; padding-left: 20px; color: #52627a; font-size: 13px; line-height: 1.65; }
+@media (max-width: 480px) {
+  .pwa-install-card, .pwa-ios-help { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); width: calc(100vw - 24px); }
+}
