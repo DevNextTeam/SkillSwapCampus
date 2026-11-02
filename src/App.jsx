@@ -215,12 +215,7 @@ function App() {
   // signed-in student changes so a fresh login never keeps the unauthenticated
   // first-load result or another student's cached dashboard data.
   useEffect(() => {
-    if (!user?.id) {
-      setDashboardSkills([]);
-      setDashboardRequestedSkills([]);
-      setDashboardLoading(false);
-      return undefined;
-    }
+    if (!user?.id) return undefined;
 
     let active = true;
     let requestInFlight = false;
@@ -252,9 +247,6 @@ function App() {
       if (document.visibilityState === "visible") loadDashboardSkills();
     };
 
-    setDashboardSkills([]);
-    setDashboardRequestedSkills([]);
-    setDashboardLoading(true);
     loadDashboardSkills();
     const refreshTimer = window.setInterval(refresh, 15000);
     const clockTimer = window.setInterval(() => setDashboardClock(Date.now()), 30000);
@@ -273,12 +265,7 @@ function App() {
   // Keep exchange and friend totals tied to the active account and refresh
   // them periodically so the dashboard reflects actions from either student.
   useEffect(() => {
-    if (!user?.id) {
-      setDashboardExchanges([]);
-      setDashboardFriends([]);
-      setDashboardOverviewLoading(false);
-      return undefined;
-    }
+    if (!user?.id) return undefined;
 
     let active = true;
     let requestInFlight = false;
@@ -306,9 +293,6 @@ function App() {
       requestInFlight = false;
     }
 
-    setDashboardExchanges([]);
-    setDashboardFriends([]);
-    setDashboardOverviewLoading(true);
     loadDashboardOverview(true);
 
     const refresh = () => {
@@ -452,6 +436,12 @@ function App() {
       });
 
       setUser(null);
+      setDashboardSkills([]);
+      setDashboardRequestedSkills([]);
+      setDashboardLoading(true);
+      setDashboardExchanges([]);
+      setDashboardFriends([]);
+      setDashboardOverviewLoading(true);
       try { window.sessionStorage.removeItem("skillswap-session-active"); } catch { /* Storage may be unavailable in private browsing. */ }
       setActivePage("Dashboard");
       setSkillMode("browse");
@@ -539,7 +529,16 @@ function App() {
 
   // SHOW LOGIN PAGE AFTER THE STARTUP SCREEN.
   if (!user) {
-    return <Auth onLogin={(nextUser) => { try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch { /* Storage may be unavailable in private browsing. */ } setUser(nextUser); }} />;
+    return <Auth onLogin={(nextUser) => {
+      setDashboardSkills([]);
+      setDashboardRequestedSkills([]);
+      setDashboardLoading(true);
+      setDashboardExchanges([]);
+      setDashboardFriends([]);
+      setDashboardOverviewLoading(true);
+      try { window.sessionStorage.setItem("skillswap-session-active", "1"); } catch { /* Storage may be unavailable in private browsing. */ }
+      setUser(nextUser);
+    }} />;
   }
 
   return (
