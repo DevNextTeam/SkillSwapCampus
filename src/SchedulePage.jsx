@@ -313,8 +313,6 @@ function SchedulePage({ user }) {
     return !Number.isNaN(proposedDate.getTime()) && proposedDate < new Date();
   };
 
-  const expiredSessions = sessions.filter(isScheduleExpired);
-
   const unscheduledSessions = sessions.filter(
     (session) =>
       session.schedule_status === "unscheduled" ||
