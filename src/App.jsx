@@ -202,6 +202,10 @@ function App() {
     window.history.replaceState({ ...window.history.state, skillswapPage: activePage }, "", url);
   }, [activePage]);
   const [skillMode, setSkillMode] = useState("browse");
+  const [exchangeStatusFocus, setExchangeStatusFocus] = useState(() => {
+    const status = new URLSearchParams(window.location.search).get("exchangeStatus");
+    return ["pending", "completed"].includes(status) ? status : "all";
+  });
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
@@ -753,7 +757,7 @@ function App() {
 
           ) : activePage === "My Exchanges" ? (
 
-            <ExchangesPage onNavigate={setActivePage} />
+            <ExchangesPage onNavigate={setActivePage} initialStatus={exchangeStatusFocus} />
 
           ) : activePage === "My Schedule" ? (
 
@@ -836,11 +840,11 @@ function App() {
                     <span className="dashboard-stat-icon"><Users size={18} /></span>
                     <span className="dashboard-stat-copy"><strong>{dashboardOverviewLoading ? "—" : dashboardFriends.length}</strong><span>Campus friends</span><small>Open your friends</small></span>
                   </button>
-                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => setActivePage("My Exchanges")} aria-label={`View ${dashboardPending} pending exchanges`}>
+                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => { setExchangeStatusFocus("pending"); setActivePage("My Exchanges"); }} aria-label={`View ${dashboardPending} pending exchanges`}>
                     <span className="dashboard-stat-icon"><CalendarDays size={18} /></span>
                     <span className="dashboard-stat-copy"><strong>{dashboardOverviewLoading ? "—" : dashboardPending}</strong><span>Pending exchanges</span><small>Review requests</small></span>
                   </button>
-                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => setActivePage("My Exchanges")} aria-label={`View ${dashboardCompleted} completed exchanges`}>
+                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => { setExchangeStatusFocus("completed"); setActivePage("My Exchanges"); }} aria-label={`View ${dashboardCompleted} completed exchanges`}>
                     <span className="dashboard-stat-icon"><CheckCircle2 size={18} /></span>
                     <span className="dashboard-stat-copy"><strong>{dashboardOverviewLoading ? "—" : dashboardCompleted}</strong><span>Completed</span><small>View history</small></span>
                   </button>
