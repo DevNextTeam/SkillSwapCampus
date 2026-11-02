@@ -184,7 +184,7 @@ export default function CampusMapPage({ user, onNavigate }) {
       const avatar = '<span class="campus-map-marker-fallback">' + fallbackInitials + '</span>' +
         (photoUrl ? '<img class="campus-map-marker-photo" src="' + escapeHtml(photoUrl) + '" alt="" loading="eager" referrerpolicy="no-referrer">' : "");
       const html = '<div class="campus-map-marker ' + (isMe ? "is-me" : "") + '">' + avatar + '</div>';
-      const icon = L.divIcon({ className: "campus-map-icon", html, iconSize: [42, 42], iconAnchor: [21, 21] });
+      const icon = L.divIcon({ className: "campus-map-icon", html, iconSize: [48, 48], iconAnchor: [24, 24] });
       const popup = '<div class="campus-map-popup"><strong>' + (label || "Campus student").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</strong><span>' + (student.university || "SkillSwap Campus").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</span><small>Updated ' + new Date(student.updated_at.replace(" ", "T") + (student.updated_at.includes("Z") ? "" : "Z")).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + '</small></div>';
       const point = [Number(student.latitude), Number(student.longitude)];
       if (markersRef.current.has(id)) {
