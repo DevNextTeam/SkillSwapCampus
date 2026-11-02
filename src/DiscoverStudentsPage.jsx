@@ -59,10 +59,30 @@ export default function DiscoverStudentsPage({ currentUserId }) {
         method: "POST",
         body: JSON.stringify({ skill_id: skill.id }),
       });
-      setExchangeRequested((current) => ({ ...current, [skill.id]: true }));
       setNotice(result.message || "Exchange request sent successfully!");
+      const refreshed = await apiRequest(`get_student_profile.php?id=${selected.id}`);
+      setSelected(refreshed.student);
     } catch (err) {
       setNotice(err.message || "Unable to send exchange request.");
+    } finally {
+      setExchangeSubmitting((current) => ({ ...current, [skill.id]: false }));
+    }
+  }
+
+  async function cancelSkillExchange(skill) {
+    if (!skill?.exchange_request_id || skill.exchange_request_status !== "pending") return;
+    setExchangeSubmitting((current) => ({ ...current, [skill.id]: true }));
+    setNotice("");
+    try {
+      const result = await apiRequest("cancel_exchange.php", {
+        method: "POST",
+        body: JSON.stringify({ request_id: skill.exchange_request_id }),
+      });
+      setNotice(result.message || "Your exchange request has been cancelled.");
+      const refreshed = await apiRequest(`get_student_profile.php?id=${selected.id}`);
+      setSelected(refreshed.student);
+    } catch (err) {
+      setNotice(err.message || "Unable to cancel this request.");
     } finally {
       setExchangeSubmitting((current) => ({ ...current, [skill.id]: false }));
     }
@@ -372,11 +392,17 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                           {skill.skill_type === "offer" && Number(selected.id) !== Number(currentUserId) && (
                             <button
                               type="button"
-                              className="student-skill-exchange"
-                              disabled={exchangeSubmitting[skill.id] || exchangeRequested[skill.id]}
-                              onClick={() => requestSkillExchange(skill)}
+                              className={`student-skill-exchange ${skill.exchange_request_status === "pending" ? "cancel-request" : ""}`}
+                              disabled={Boolean(exchangeSubmitting[skill.id]) || skill.exchange_request_status === "accepted"}
+                              onClick={() => skill.exchange_request_status === "pending" ? cancelSkillExchange(skill) : requestSkillExchange(skill)}
                             >
-                              {exchangeSubmitting[skill.id] ? "Sending..." : exchangeRequested[skill.id] ? "Request sent" : "Request skill exchange"}
+                              {exchangeSubmitting[skill.id]
+                                ? (skill.exchange_request_status === "pending" ? "Cancelling..." : "Sending...")
+                                : skill.exchange_request_status === "pending"
+                                  ? "Cancel Request"
+                                  : skill.exchange_request_status === "accepted"
+                                    ? "Exchange accepted"
+                                    : "Request skill exchange"}
                             </button>
                           )}
                         </article>
