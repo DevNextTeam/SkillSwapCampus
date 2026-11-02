@@ -38,3 +38,5 @@
  .campus-map-actions{grid-template-columns:1fr}
  .campus-map-canvas-wrap{height:300px}
 }
+
+@media(max-width:700px){.page-content{min-width:0;width:100%;max-width:100%;overflow-x:hidden}.campus-map-layout{width:100%;grid-template-columns:minmax(0,1fr)}.campus-map-roster{width:100%}.campus-map-profile-modal *{max-width:100%;overflow-wrap:anywhere}}
