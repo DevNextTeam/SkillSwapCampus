@@ -36,6 +36,7 @@ try {
             users.full_name,
             users.university,
             users.course,
+            skills.created_at,
 
             CASE
                 WHEN EXISTS (
@@ -58,7 +59,7 @@ try {
          INNER JOIN users
             ON skills.user_id = users.id
 
-         ORDER BY skills.id DESC"
+         ORDER BY skills.created_at DESC, skills.id DESC"
     );
 
     $stmt->execute([
