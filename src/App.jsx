@@ -240,11 +240,8 @@ function App() {
           );
         }
       } catch (error) {
+        // Keep the last successful feed during a temporary network failure.
         console.error("Unable to load dashboard skills:", error);
-        if (active) {
-          setDashboardSkills([]);
-          setDashboardRequestedSkills([]);
-        }
       } finally {
         requestInFlight = false;
         if (active) setDashboardLoading(false);
@@ -255,6 +252,8 @@ function App() {
       if (document.visibilityState === "visible") loadDashboardSkills();
     };
 
+    setDashboardSkills([]);
+    setDashboardRequestedSkills([]);
     setDashboardLoading(true);
     loadDashboardSkills();
     const refreshTimer = window.setInterval(refresh, 15000);
@@ -284,10 +283,10 @@ function App() {
     let active = true;
     let requestInFlight = false;
 
-    async function loadDashboardOverview() {
+    async function loadDashboardOverview(showLoading = false) {
       if (requestInFlight) return;
       requestInFlight = true;
-      setDashboardOverviewLoading(true);
+      if (showLoading) setDashboardOverviewLoading(true);
 
       const [exchangeResult, socialResult] = await Promise.allSettled([
         apiRequest("get_exchanges.php"),
@@ -295,17 +294,13 @@ function App() {
       ]);
 
       if (active) {
-        setDashboardExchanges(
-          exchangeResult.status === "fulfilled"
-            ? exchangeResult.value.exchanges || []
-            : []
-        );
-        setDashboardFriends(
-          socialResult.status === "fulfilled"
-            ? socialResult.value.friends || []
-            : []
-        );
-        setDashboardOverviewLoading(false);
+        if (exchangeResult.status === "fulfilled") {
+          setDashboardExchanges(exchangeResult.value.exchanges || []);
+        }
+        if (socialResult.status === "fulfilled") {
+          setDashboardFriends(socialResult.value.friends || []);
+        }
+        if (showLoading) setDashboardOverviewLoading(false);
       }
 
       requestInFlight = false;
@@ -313,7 +308,8 @@ function App() {
 
     setDashboardExchanges([]);
     setDashboardFriends([]);
-    loadDashboardOverview();
+    setDashboardOverviewLoading(true);
+    loadDashboardOverview(true);
 
     const refresh = () => {
       if (document.visibilityState === "visible") loadDashboardOverview();
