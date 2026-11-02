@@ -213,7 +213,7 @@ export default function CampusMapPage({ user, onNavigate }) {
         const marker = L.marker(point, { icon }).addTo(map).bindPopup(popup);
         marker.on("click", () => openStudentProfile(student));
         markersRef.current.set(id, marker);
-        attachMarkerPhotoFallback(marker);
+        attachMarkerPhotoFallback(marker, label || "Campus student");
       }
     });
   }, [visibleLocations, locations, mapReady, user.id]);
