@@ -655,7 +655,7 @@ function App() {
 
           ) : activePage === "My Exchanges" ? (
 
-            <ExchangesPage />
+            <ExchangesPage onNavigate={setActivePage} />
 
           ) : activePage === "My Schedule" ? (
 
