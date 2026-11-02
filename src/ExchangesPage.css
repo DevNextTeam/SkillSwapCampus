@@ -454,3 +454,27 @@
   .exchange-search, .exchange-status-filter { flex: 1 1 100%; }
   .exchange-result-count { margin-left: 0; }
 }
+
+
+/* Accepted exchange next steps */
+.exchange-accepted-actions {
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.exchange-accepted-actions button {
+  min-height: 42px;
+}
+.exchange-schedule-button {
+  border: 1px solid #cbdcf8;
+  background: #f2f6ff;
+  color: #1456b8;
+}
+.exchange-schedule-button:hover {
+  background: #e7efff;
+  border-color: #a9c4f2;
+}
+@media (max-width: 420px) {
+  .exchange-accepted-actions {
+    flex-direction: column;
+  }
+}
