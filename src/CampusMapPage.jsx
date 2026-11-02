@@ -44,11 +44,19 @@ function escapeHtml(value = "") {
 }
 
 function getProfilePhotoUrl(photoPath) {
-  if (!photoPath) return "";
-  const path = String(photoPath);
-  return /^https?:\/\//i.test(path)
-    ? path
-    : API_BASE.replace(/\/$/, "") + "/" + path.replace(/^\//, "");
+  if (typeof photoPath !== "string" || !photoPath.trim()) return "";
+  const path = photoPath.trim();
+  if (/^(https?:|data:)/i.test(path)) return path;
+  const apiRoot = API_BASE.replace(/\/$/, "");
+  if (path.startsWith("/")) return window.location.origin + path;
+  if (path.startsWith("backend/")) return window.location.origin + "/skillswap-campus/" + path;
+  return apiRoot + "/" + path.replace(/^\.\//, "");
+}
+
+function attachMarkerPhotoFallback(marker) {
+  const image = marker.getElement()?.querySelector(".campus-map-marker-photo");
+  if (!image) return;
+  image.addEventListener("error", () => image.remove(), { once: true });
 }
 
 export default function CampusMapPage({ user, onNavigate }) {
@@ -173,9 +181,8 @@ export default function CampusMapPage({ user, onNavigate }) {
       const label = isMe ? "You" : student.full_name;
       const photoUrl = getProfilePhotoUrl(student.profile_photo);
       const fallbackInitials = escapeHtml(initials(student.full_name));
-      const avatar = photoUrl
-        ? '<img src="' + escapeHtml(photoUrl) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'"><span class="campus-map-marker-fallback" style="display:none">' + fallbackInitials + '</span>'
-        : '<span class="campus-map-marker-fallback">' + fallbackInitials + '</span>';
+      const avatar = '<span class="campus-map-marker-fallback">' + fallbackInitials + '</span>' +
+        (photoUrl ? '<img class="campus-map-marker-photo" src="' + escapeHtml(photoUrl) + '" alt="" loading="eager" referrerpolicy="no-referrer">' : "");
       const html = '<div class="campus-map-marker ' + (isMe ? "is-me" : "") + '">' + avatar + '</div>';
       const icon = L.divIcon({ className: "campus-map-icon", html, iconSize: [42, 42], iconAnchor: [21, 21] });
       const popup = '<div class="campus-map-popup"><strong>' + (label || "Campus student").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</strong><span>' + (student.university || "SkillSwap Campus").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</span><small>Updated ' + new Date(student.updated_at.replace(" ", "T") + (student.updated_at.includes("Z") ? "" : "Z")).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + '</small></div>';
@@ -183,11 +190,14 @@ export default function CampusMapPage({ user, onNavigate }) {
       if (markersRef.current.has(id)) {
         // Refresh the icon as well as the coordinates: profile photos can be
         // added or changed while a student is already visible on the map.
-        markersRef.current.get(id).setLatLng(point).setIcon(icon).setPopupContent(popup).off("click").on("click", () => openStudentProfile(student));
+        const marker = markersRef.current.get(id);
+        marker.setLatLng(point).setIcon(icon).setPopupContent(popup).off("click").on("click", () => openStudentProfile(student));
+        attachMarkerPhotoFallback(marker);
       } else {
         const marker = L.marker(point, { icon }).addTo(map).bindPopup(popup);
         marker.on("click", () => openStudentProfile(student));
         markersRef.current.set(id, marker);
+        attachMarkerPhotoFallback(marker);
       }
     });
   }, [visibleLocations, locations, mapReady, user.id]);
