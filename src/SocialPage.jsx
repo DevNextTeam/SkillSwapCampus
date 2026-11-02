@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle, Users, RefreshCw, Send, Check, X, ArrowLeft } from "lucide-react";
+import { MessageCircle, Users, RefreshCw, Send, Check, X, ArrowLeft, Paperclip, ImagePlus, FileText, Download } from "lucide-react";
 import { apiRequest, API_BASE } from "./api";
 import "./SocialPage.css";
 
@@ -13,6 +13,10 @@ export default function SocialPage({ currentUserId }) {
   const [active,setActive]=useState(null);
   const [messages,setMessages]=useState([]);
   const [draft,setDraft]=useState("");
+  const [attachment,setAttachment]=useState(null);
+  const [uploading,setUploading]=useState(false);
+  const fileInput=useRef(null);
+  const cameraInput=useRef(null);
   const [notice,setNotice]=useState("");
   const [sending,setSending]=useState(false);
   const [chatLoading,setChatLoading]=useState(false);
@@ -69,7 +73,33 @@ export default function SocialPage({ currentUserId }) {
     }catch(e){if(id===messageLoadId.current)setNotice(e.message||"Unable to load messages.");}
     finally{if(id===messageLoadId.current)setChatLoading(false);}
   }
-  async function send(event){event.preventDefault();if(!draft.trim()||!active||sending)return;setSending(true);try{await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:draft.trim()})});setDraft("");const r=await apiRequest("messages.php?user_id="+active.user_id);setMessages(r.messages||[]);messageCache.current.set(String(active.user_id),r.messages||[]);refreshSocialData();}catch(e){setNotice(e.message||"Unable to send message.");}finally{setSending(false);}}
+  async function send(event){
+    event.preventDefault();
+    if(!active||sending||(!draft.trim()&&!attachment))return;
+    setSending(true);
+    try{
+      if(attachment){
+        const form=new FormData();form.append("user_id",String(active.user_id));form.append("file",attachment);
+        setUploading(true);
+        await apiRequest("message_attachment.php",{method:"POST",body:form});
+      }
+      if(draft.trim())await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:draft.trim()})});
+      setDraft("");setAttachment(null);
+      if(fileInput.current)fileInput.current.value="";
+      if(cameraInput.current)cameraInput.current.value="";
+      const r=await apiRequest("messages.php?user_id="+active.user_id);
+      setMessages(r.messages||[]);messageCache.current.set(String(active.user_id),r.messages||[]);refreshSocialData();
+    }catch(e){setNotice(e.message||"Unable to send message.");}
+    finally{setSending(false);setUploading(false);}
+  }
+  function renderAttachment(message){
+    if(!message.attachment_name)return null;
+    const url=API_BASE+"/message_attachment.php?id="+encodeURIComponent(message.id);
+    return <a className="social-attachment" href={url} target="_blank" rel="noreferrer">
+      {String(message.attachment_mime||"").startsWith("image/")?<img src={url} alt={message.attachment_name} loading="lazy"/>:<span className="social-file-icon"><FileText size={22}/></span>}
+      <span><strong>{message.attachment_name}</strong><small>{Math.max(1,Math.round(Number(message.attachment_size||0)/1024))} KB · Open attachment</small></span><Download size={16}/>
+    </a>;
+  }
   return <div className="social-page">
     <div className="social-page-heading"><div><span className="social-kicker"><Users size={15}/> CAMPUS COMMUNITY</span><h2>Friends & messages</h2><p>Manage friend requests and continue your conversations.</p></div><button onClick={refresh} disabled={loading}><RefreshCw size={16}/> Refresh</button></div>
     {notice&&<p className="social-notice">{notice}</p>}{error&&<p className="social-error">{error}</p>}
@@ -80,7 +110,18 @@ export default function SocialPage({ currentUserId }) {
         <div className="social-section-title social-friends-title"><h3>Your friends</h3><span>{data.friends.length}</span></div>
         {loading?<p className="social-muted">Loading friends...</p>:data.friends.length===0?<p className="social-muted">Your accepted connections will appear here.</p>:data.friends.map(friend=><button className={"social-friend-row "+(active?.user_id===friend.user_id?"selected":"")} key={friend.friendship_id} onClick={()=>openChat(friend)}><Avatar person={friend}/><span className="social-person-copy"><strong>{friend.full_name}</strong><small>{friend.last_message?.body||friend.university||"Start a conversation"}</small></span>{Number(friend.unread_count)>0&&<span className="social-unread-count">{friend.unread_count>99?"99+":friend.unread_count}</span>}<MessageCircle size={17}/></button>)}
       </section>
-      {active && <section className="social-chat-panel">      {active?<><header className="social-chat-header"><button className="social-back" onClick={()=>{activeUserId.current=null;messageLoadId.current+=1;setActive(null);setMessages([]);setChatLoading(false);}}><ArrowLeft size={18}/></button><Avatar person={active}/><div><strong>{active.full_name}</strong><small>Friend · Private conversation</small></div></header><div className="social-messages">{chatLoading&&!messages.length?<div className="social-chat-loading"><span/><span/><span/>Loading conversation…</div>:messages.length?messages.map(m=><div key={m.id} className={"social-bubble "+(Number(m.sender_id)===Number(currentUserId)?"mine":"theirs")}><p>{m.body}</p><time>{m.created_at}</time></div>):<div className="social-chat-empty"><MessageCircle size={28}/><strong>Start the conversation</strong><span>Say hello and share what you're learning.</span></div>}</div><form className="social-compose" onSubmit={send}><input value={draft} onChange={e=>setDraft(e.target.value)} maxLength={4000} placeholder={"Message "+active.full_name+"..."} /><button disabled={!draft.trim()||sending}><Send size={17}/></button></form></>:<div className="social-chat-placeholder"><div><MessageCircle size={34}/></div><h3>Your conversations</h3><p>Select a friend to view your chat history and send a private message.</p></div>}
+      {active && <section className="social-chat-panel">      {active?<><header className="social-chat-header"><button className="social-back" onClick={()=>{activeUserId.current=null;messageLoadId.current+=1;setActive(null);setMessages([]);setChatLoading(false);}}><ArrowLeft size={18}/></button><Avatar person={active}/><div><strong>{active.full_name}</strong><small>Friend · Private conversation</small></div></header><div className="social-messages">{chatLoading&&!messages.length?<div className="social-chat-loading"><span/><span/><span/>Loading conversation…</div>:messages.length?messages.map(m=><div key={m.id} className={"social-bubble "+(Number(m.sender_id)===Number(currentUserId)?"mine":"theirs")}>{m.body&&<p>{m.body}</p>}{renderAttachment(m)}<time>{m.created_at}</time></div>):<div className="social-chat-empty"><MessageCircle size={28}/><strong>Start the conversation</strong><span>Say hello and share what you're learning.</span></div>}</div><form className="social-compose" onSubmit={send}>
+        {attachment&&<div className="social-attachment-pending"><span>{attachment.name}</span><button type="button" onClick={()=>setAttachment(null)} aria-label="Remove attachment"><X size={15}/></button></div>}
+        <div className="social-compose-row">
+          <button type="button" className="social-attach-button" title="Attach a file" onClick={()=>fileInput.current?.click()}><Paperclip size={18}/></button>
+          <button type="button" className="social-attach-button" title="Take or choose a photo" onClick={()=>cameraInput.current?.click()}><ImagePlus size={18}/></button>
+          <input ref={fileInput} type="file" hidden onChange={e=>setAttachment(e.target.files?.[0]||null)}/>
+          <input ref={cameraInput} type="file" hidden accept="image/*" capture="environment" onChange={e=>setAttachment(e.target.files?.[0]||null)}/>
+          <input value={draft} onChange={e=>setDraft(e.target.value)} maxLength={4000} placeholder={"Message "+active.full_name+"..."} />
+          <button disabled={(!draft.trim()&&!attachment)||sending}>{uploading?"…":<Send size={17}/>}</button>
+        </div>
+        <small className="social-compose-hint">Photos and documents up to 10 MB</small>
+      </form></>:<div className="social-chat-placeholder"><div><MessageCircle size={34}/></div><h3>Your conversations</h3><p>Select a friend to view your chat history and send a private message.</p></div>}
       </section>}
     </div>
   </div>;
