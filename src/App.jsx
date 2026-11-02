@@ -215,7 +215,7 @@ function App() {
   // signed-in student changes so a fresh login never keeps the unauthenticated
   // first-load result or another student's cached dashboard data.
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       setDashboardSkills([]);
       setDashboardRequestedSkills([]);
       setDashboardLoading(false);
@@ -274,7 +274,7 @@ function App() {
   // Keep exchange and friend totals tied to the active account and refresh
   // them periodically so the dashboard reflects actions from either student.
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
       setDashboardExchanges([]);
       setDashboardFriends([]);
       setDashboardOverviewLoading(false);
