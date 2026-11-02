@@ -188,7 +188,19 @@ function ProfilePage({ user, onProfileUpdated }) {
 
 // MAIN APPLICATION
 function App() {
-  const [activePage, setActivePage] = useState("Dashboard");
+  const [activePage, setActivePage] = useState(() => {
+    const requestedPage = new URLSearchParams(window.location.search).get("page");
+    const validPages = [...navigation.map((item) => item.label), "Share a Skill"];
+    return validPages.includes(requestedPage) ? requestedPage : "Dashboard";
+  });
+
+  // Keep the current in-app page in the URL so refresh/reopen restores it.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (activePage === "Dashboard") url.searchParams.delete("page");
+    else url.searchParams.set("page", activePage);
+    window.history.replaceState({ ...window.history.state, skillswapPage: activePage }, "", url);
+  }, [activePage]);
   const [skillMode, setSkillMode] = useState("browse");
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
@@ -816,22 +828,22 @@ function App() {
                   </button>
                 </div>
                 <div className="dashboard-stat-grid">
-                  <article className="dashboard-stat-card">
+                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => setActivePage("My Profile")} aria-label={`View ${dashboardMyLearning.length} learning goals in your profile`}>
                     <span className="dashboard-stat-icon"><BookOpen size={18} /></span>
-                    <div><strong>{dashboardMyLearning.length}</strong><span>Learning goals</span></div>
-                  </article>
-                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-copy"><strong>{dashboardMyLearning.length}</strong><span>Learning goals</span><small>View your goals</small></span>
+                  </button>
+                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => setActivePage("Friends & Messages")} aria-label={`View ${dashboardFriends.length} campus friends`}>
                     <span className="dashboard-stat-icon"><Users size={18} /></span>
-                    <div><strong>{dashboardOverviewLoading ? "—" : dashboardFriends.length}</strong><span>Campus friends</span></div>
-                  </article>
-                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-copy"><strong>{dashboardOverviewLoading ? "—" : dashboardFriends.length}</strong><span>Campus friends</span><small>Open your friends</small></span>
+                  </button>
+                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => setActivePage("My Exchanges")} aria-label={`View ${dashboardPending} pending exchanges`}>
                     <span className="dashboard-stat-icon"><CalendarDays size={18} /></span>
-                    <div><strong>{dashboardOverviewLoading ? "—" : dashboardPending}</strong><span>Pending exchanges</span></div>
-                  </article>
-                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-copy"><strong>{dashboardOverviewLoading ? "—" : dashboardPending}</strong><span>Pending exchanges</span><small>Review requests</small></span>
+                  </button>
+                  <button type="button" className="dashboard-stat-card dashboard-stat-action" onClick={() => setActivePage("My Exchanges")} aria-label={`View ${dashboardCompleted} completed exchanges`}>
                     <span className="dashboard-stat-icon"><CheckCircle2 size={18} /></span>
-                    <div><strong>{dashboardOverviewLoading ? "—" : dashboardCompleted}</strong><span>Completed</span></div>
-                  </article>
+                    <span className="dashboard-stat-copy"><strong>{dashboardOverviewLoading ? "—" : dashboardCompleted}</strong><span>Completed</span><small>View history</small></span>
+                  </button>
                 </div>
                 {!dashboardOverviewLoading && dashboardAccepted > 0 && (
                   <p className="dashboard-next-step"><Sparkles size={15} /> You have {dashboardAccepted} accepted exchange{dashboardAccepted === 1 ? "" : "s"} ready for your next learning session.</p>
