@@ -317,10 +317,18 @@ function SchedulePage({ user }) {
     return !Number.isNaN(date.getTime()) && date >= new Date();
   });
 
+  const isScheduleExpired = (session) => {
+    if (!session.scheduled_at) return false;
+    if (!["pending", "confirmed"].includes(session.schedule_status)) return false;
+    const proposedDate = new Date(session.scheduled_at.replace(" ", "T"));
+    return !Number.isNaN(proposedDate.getTime()) && proposedDate < new Date();
+  };
+
   const unscheduledSessions = sessions.filter(
     (session) =>
       session.schedule_status === "unscheduled" ||
-      session.schedule_status === "declined"
+      session.schedule_status === "declined" ||
+      isScheduleExpired(session)
   );
 
   return (
@@ -424,6 +432,7 @@ function SchedulePage({ user }) {
 
               const scheduleAction =
                 session.schedule_action || "none";
+              const isExpired = isScheduleExpired(session);
 
               return (
                 <article
@@ -557,7 +566,19 @@ function SchedulePage({ user }) {
                     </div>
                   ) : (
                     <>
-                      {scheduleStatus === "pending" && (
+                      {isExpired && (
+                        <div className="schedule-expired-notice" role="status">
+                          <XCircle size={18} />
+                          <div>
+                            <strong>Schedule expired</strong>
+                            <span>
+                              This proposed meeting date has passed. Either student can suggest a new date and time.
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {scheduleStatus === "pending" && !isExpired && (
                         <div className="schedule-proposal-notice">
                           <Hourglass size={18} />
                           <div>
@@ -576,7 +597,7 @@ function SchedulePage({ user }) {
                         </div>
                       )}
 
-                      {scheduleStatus === "confirmed" && (
+                      {scheduleStatus === "confirmed" && !isExpired && (
                         <div className="schedule-confirmed-notice">
                           <CheckCircle2 size={18} />
                           <div>
@@ -588,7 +609,7 @@ function SchedulePage({ user }) {
                         </div>
                       )}
 
-                      {scheduleStatus === "declined" && (
+                      {scheduleStatus === "declined" && !isExpired && (
                         <div className="schedule-declined-notice">
                           <XCircle size={18} />
                           <div>
@@ -640,7 +661,8 @@ function SchedulePage({ user }) {
                       </div>
 
                       {(scheduleStatus === "unscheduled" ||
-                        scheduleStatus === "declined") && (
+                        scheduleStatus === "declined" ||
+                        isExpired) && (
                         <button
                           type="button"
                           className="schedule-edit-button"
@@ -653,7 +675,7 @@ function SchedulePage({ user }) {
                         </button>
                       )}
 
-                      {scheduleStatus === "pending" && (
+                      {scheduleStatus === "pending" && !isExpired && (
                         <>
                           <button
                             type="button"
@@ -713,7 +735,7 @@ function SchedulePage({ user }) {
                         </>
                       )}
 
-                      {scheduleStatus === "confirmed" && (
+                      {scheduleStatus === "confirmed" && !isExpired && (
                         <>
                           <div className="schedule-confirmed-label">
                             <CheckCircle2 size={16} />
