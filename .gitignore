@@ -30,6 +30,9 @@ dist-ssr
 
 # PHP dependencies
 
-# User-uploaded profile images are stored on the server, not in Git.
+# User-uploaded files are stored on the server, not in Git.
 backend/uploads/profiles/*
+backend/uploads/messages/*
 !backend/uploads/profiles/.htaccess
+!backend/uploads/messages/.htaccess
+!backend/uploads/.htaccess
