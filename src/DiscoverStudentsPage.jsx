@@ -385,6 +385,18 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                   </section>
                 )}
                 {notice && <p className="student-profile-notice">{notice}</p>}
+                {selected.friend_status?.status === "accepted" && (
+                  <div className="student-chat student-profile-chat">
+                    <div className="student-chat-title">PRIVATE MESSAGES</div>
+                    <div className="student-chat-history">
+                      {conversation.length ? conversation.map(item => <p className={Number(item.sender_id) === Number(currentUserId) ? "sent" : "received"} key={item.id}>{item.body}<small>{item.created_at}</small></p>) : <p className="student-chat-empty">Your conversation with {selected.full_name} will appear here.</p>}
+                    </div>
+                    <form onSubmit={sendMessage}>
+                      <input value={messageText} onChange={event => setMessageText(event.target.value)} placeholder="Write a message..." maxLength={4000}/>
+                      <button type="submit" disabled={!messageText.trim()}>Send</button>
+                    </form>
+                  </div>
+                )}
               </div>
             </article>
           )}
