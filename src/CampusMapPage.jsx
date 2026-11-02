@@ -37,6 +37,20 @@ function initials(name = "") {
   return name.trim().split(/\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ST";
 }
 
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]);
+}
+
+function getProfilePhotoUrl(photoPath) {
+  if (!photoPath) return "";
+  const path = String(photoPath);
+  return /^https?:\/\//i.test(path)
+    ? path
+    : API_BASE.replace(/\/$/, "") + "/" + path.replace(/^\//, "");
+}
+
 export default function CampusMapPage({ user, onNavigate }) {
   const mapElement = useRef(null);
   const mapRef = useRef(null);
@@ -157,15 +171,19 @@ export default function CampusMapPage({ user, onNavigate }) {
       const id = String(student.user_id);
       const isMe = Number(student.user_id) === Number(user.id);
       const label = isMe ? "You" : student.full_name;
-      const avatar = student.profile_photo
-        ? '<img src="' + String(API_BASE + "/" + student.profile_photo).replace(/&/g, "&amp;").replace(/"/g, "&quot;") + '" alt="">'
-        : '<span>' + initials(student.full_name) + '</span>';
+      const photoUrl = getProfilePhotoUrl(student.profile_photo);
+      const fallbackInitials = escapeHtml(initials(student.full_name));
+      const avatar = photoUrl
+        ? '<img src="' + escapeHtml(photoUrl) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'"><span class="campus-map-marker-fallback" style="display:none">' + fallbackInitials + '</span>'
+        : '<span class="campus-map-marker-fallback">' + fallbackInitials + '</span>';
       const html = '<div class="campus-map-marker ' + (isMe ? "is-me" : "") + '">' + avatar + '</div>';
       const icon = L.divIcon({ className: "campus-map-icon", html, iconSize: [42, 42], iconAnchor: [21, 21] });
       const popup = '<div class="campus-map-popup"><strong>' + (label || "Campus student").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</strong><span>' + (student.university || "SkillSwap Campus").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])) + '</span><small>Updated ' + new Date(student.updated_at.replace(" ", "T") + (student.updated_at.includes("Z") ? "" : "Z")).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + '</small></div>';
       const point = [Number(student.latitude), Number(student.longitude)];
       if (markersRef.current.has(id)) {
-        markersRef.current.get(id).setLatLng(point).setPopupContent(popup).off("click").on("click", () => openStudentProfile(student));
+        // Refresh the icon as well as the coordinates: profile photos can be
+        // added or changed while a student is already visible on the map.
+        markersRef.current.get(id).setLatLng(point).setIcon(icon).setPopupContent(popup).off("click").on("click", () => openStudentProfile(student));
       } else {
         const marker = L.marker(point, { icon }).addTo(map).bindPopup(popup);
         marker.on("click", () => openStudentProfile(student));
