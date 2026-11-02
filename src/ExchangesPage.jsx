@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   XCircle,
   Clock3,
+  CalendarDays,
   BookOpen,
   GraduationCap,
   Inbox,
@@ -18,7 +19,7 @@ import {
 import { apiRequest } from "./api";
 import "./ExchangesPage.css";
 
-function ExchangesPage() {
+function ExchangesPage({ onNavigate }) {
   const [exchanges, setExchanges] = useState([]);
   const latestLoadId = useRef(0);
   const [activeTab, setActiveTab] = useState("all");
@@ -507,11 +508,23 @@ function ExchangesPage() {
                 )}
 
                 {exchange.status === "accepted" && (
-                  <div className="exchange-actions">
+                  <div className="exchange-actions exchange-accepted-actions">
+                    <button
+                      type="button"
+                      className="exchange-schedule-button"
+                      onClick={() => onNavigate?.("My Schedule")}
+                    >
+                      <CalendarDays size={16} />
+                      Plan learning session
+                    </button>
                     <button
                       type="button"
                       className="exchange-accept-button"
-                      onClick={() => handleResponse(exchange.id, "completed")}
+                      onClick={() => {
+                        if (window.confirm("Mark this skill exchange as completed?")) {
+                          handleResponse(exchange.id, "completed");
+                        }
+                      }}
                       disabled={updatingId !== null}
                     >
                       <CheckCircle2 size={16} />
