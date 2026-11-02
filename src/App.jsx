@@ -194,6 +194,12 @@ function App() {
     return validPages.includes(requestedPage) ? requestedPage : "Dashboard";
   });
 
+  const [skillMode, setSkillMode] = useState(() => new URLSearchParams(window.location.search).get("page") === "Share a Skill" ? "create" : "browse");
+  const [exchangeStatusFocus, setExchangeStatusFocus] = useState(() => {
+    const status = new URLSearchParams(window.location.search).get("exchangeStatus");
+    return ["pending", "completed"].includes(status) ? status : "all";
+  });
+
   // Keep the current in-app page in the URL so refresh/reopen restores it.
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -206,11 +212,7 @@ function App() {
     }
     window.history.replaceState({ ...window.history.state, skillswapPage: activePage }, "", url);
   }, [activePage, exchangeStatusFocus]);
-  const [skillMode, setSkillMode] = useState("browse");
-  const [exchangeStatusFocus, setExchangeStatusFocus] = useState(() => {
-    const status = new URLSearchParams(window.location.search).get("exchangeStatus");
-    return ["pending", "completed"].includes(status) ? status : "all";
-  });
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
