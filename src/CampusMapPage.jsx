@@ -189,7 +189,6 @@ export default function CampusMapPage({ user, onNavigate }) {
       const isMe = Number(student.user_id) === Number(user.id);
       const label = isMe ? "You" : student.full_name;
       const photoUrl = getProfilePhotoUrl(student.profile_photo);
-      const fallbackInitials = escapeHtml(initials(student.full_name));
       // Keep map markers uncluttered: show a circular photo when available;
       // use the student's name only when there is no usable profile photo.
       const markerClass = photoUrl ? "campus-map-icon campus-map-icon-photo" : "campus-map-icon campus-map-icon-label";
