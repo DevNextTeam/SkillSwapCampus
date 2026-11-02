@@ -180,6 +180,9 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dashboardSkills, setDashboardSkills] = useState([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardExchanges, setDashboardExchanges] = useState([]);
+  const [dashboardFriends, setDashboardFriends] = useState([]);
+  const [dashboardOverviewLoading, setDashboardOverviewLoading] = useState(true);
   const [dashboardRequestedSkills, setDashboardRequestedSkills] = useState([]);
   const [dashboardRequestingId, setDashboardRequestingId] = useState(null);
   const [dashboardExchangeNotice, setDashboardExchangeNotice] = useState("");
@@ -212,6 +215,27 @@ function App() {
       }
     }
     loadDashboardSkills();
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    async function loadDashboardOverview() {
+      setDashboardOverviewLoading(true);
+      const [exchangeResult, socialResult] = await Promise.allSettled([
+        apiRequest("get_exchanges.php"),
+        apiRequest("social.php"),
+      ]);
+      if (!active) return;
+      if (exchangeResult.status === "fulfilled") {
+        setDashboardExchanges(exchangeResult.value.exchanges || []);
+      }
+      if (socialResult.status === "fulfilled") {
+        setDashboardFriends(socialResult.value.friends || []);
+      }
+      setDashboardOverviewLoading(false);
+    }
+    loadDashboardOverview();
     return () => { active = false; };
   }, []);
 
@@ -379,6 +403,28 @@ function App() {
     : "ST";
 
 
+
+  const dashboardMyLearning = dashboardSkills.filter(
+    (skill) => Number(skill.user_id) === Number(user?.id) && skill.skill_type === "learn"
+  );
+  const dashboardRecommendedSkills = dashboardSkills
+    .filter((skill) => skill.skill_type === "offer" && Number(skill.user_id) !== Number(user?.id))
+    .map((skill) => {
+      const skillName = (skill.skill_name || "").toLowerCase();
+      const category = (skill.category || "").toLowerCase();
+      const matchedInterest = dashboardMyLearning.find((interest) => {
+        const interestName = (interest.skill_name || "").toLowerCase();
+        const interestCategory = (interest.category || "").toLowerCase();
+        return (category && interestCategory && category === interestCategory) ||
+          (skillName && interestName && (skillName.includes(interestName) || interestName.includes(skillName)));
+      });
+      return matchedInterest ? { ...skill, matchedInterest: matchedInterest.skill_name } : null;
+    })
+    .filter(Boolean)
+    .slice(0, 3);
+  const dashboardPending = dashboardExchanges.filter((item) => item.status === "pending").length;
+  const dashboardAccepted = dashboardExchanges.filter((item) => item.status === "accepted").length;
+  const dashboardCompleted = dashboardExchanges.filter((item) => item.status === "completed").length;
 
   // LOGO AND ANIMATED LOADING SCREEN.
   if (authLoading && showStartupSplash) {
@@ -670,6 +716,73 @@ function App() {
                   <div className="art-dot dot-two" />
                 </div>
               </section>
+
+              {/* PERSONAL LEARNING OVERVIEW */}
+              <section className="dashboard-overview">
+                <div className="dashboard-overview-heading">
+                  <div>
+                    <span className="dashboard-overview-eyebrow">YOUR CAMPUS JOURNEY</span>
+                    <h2>Your learning at a glance</h2>
+                    <p>A quick look at your connections and skill exchanges.</p>
+                  </div>
+                  <button type="button" className="dashboard-overview-link" onClick={() => setActivePage("My Exchanges")}>
+                    View exchanges <ArrowUpRight size={15} />
+                  </button>
+                </div>
+                <div className="dashboard-stat-grid">
+                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-icon"><BookOpen size={18} /></span>
+                    <div><strong>{dashboardMyLearning.length}</strong><span>Learning goals</span></div>
+                  </article>
+                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-icon"><Users size={18} /></span>
+                    <div><strong>{dashboardOverviewLoading ? "—" : dashboardFriends.length}</strong><span>Campus friends</span></div>
+                  </article>
+                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-icon"><CalendarDays size={18} /></span>
+                    <div><strong>{dashboardOverviewLoading ? "—" : dashboardPending}</strong><span>Pending exchanges</span></div>
+                  </article>
+                  <article className="dashboard-stat-card">
+                    <span className="dashboard-stat-icon"><CheckCircle2 size={18} /></span>
+                    <div><strong>{dashboardOverviewLoading ? "—" : dashboardCompleted}</strong><span>Completed</span></div>
+                  </article>
+                </div>
+                {!dashboardOverviewLoading && dashboardAccepted > 0 && (
+                  <p className="dashboard-next-step"><Sparkles size={15} /> You have {dashboardAccepted} accepted exchange{dashboardAccepted === 1 ? "" : "s"} ready for your next learning session.</p>
+                )}
+              </section>
+
+              {dashboardMyLearning.length > 0 && (
+                <section className="dashboard-recommendations">
+                  <div className="dashboard-overview-heading">
+                    <div>
+                      <span className="dashboard-overview-eyebrow">BASED ON YOUR LEARNING GOALS</span>
+                      <h2>Recommended skill matches</h2>
+                      <p>Students offering skills related to what you want to learn.</p>
+                    </div>
+                  </div>
+                  {dashboardRecommendedSkills.length ? (
+                    <div className="dashboard-recommendation-grid">
+                      {dashboardRecommendedSkills.map((skill) => (
+                        <article className="dashboard-recommendation-card" key={skill.id}>
+                          <span className="dashboard-match-label"><Sparkles size={13} /> Match for {skill.matchedInterest}</span>
+                          <h3>{skill.skill_name}</h3>
+                          <p>{skill.description || "A student in your campus community can help you learn this skill."}</p>
+                          <div className="dashboard-recommendation-person">
+                            <span>{(skill.full_name || "S").trim().split(/\\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</span>
+                            <div><strong>{skill.full_name || "Campus student"}</strong><small>{skill.university || "Campus member"}</small></div>
+                          </div>
+                          <button type="button" className="dashboard-exchange-button" onClick={() => requestDashboardExchange(skill)} disabled={dashboardRequestedSkills.includes(Number(skill.id)) || dashboardRequestingId === Number(skill.id)}>
+                            {dashboardRequestedSkills.includes(Number(skill.id)) ? "Request sent" : dashboardRequestingId === Number(skill.id) ? "Sending request..." : <>Request an exchange <ArrowUpRight size={15} /></>}
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="dashboard-recommendation-empty"><Sparkles size={18} /><span>No direct matches yet. We'll show recommendations when students share skills in your learning categories.</span></div>
+                  )}
+                </section>
+              )}
 
               {/* LATEST COMMUNITY SKILLS */}
               <section className="skills-section">
