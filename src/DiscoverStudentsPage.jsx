@@ -310,7 +310,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
               </div>
               <div className="student-quick-actions">
                 {!selected.friend_status || selected.friend_status.status === "declined" ? <button type="button" onClick={() => friendAction("send")}>Add friend</button> : selected.friend_status.status === "pending" && Number(selected.friend_status.sender_id) === Number(currentUserId) ? <span className="student-request-status">Request sent · Pending</span> : selected.friend_status.status === "pending" ? <button type="button" onClick={() => friendAction("accept")}>Accept request</button> : <span className="student-request-status">Friends</span>}
-                <button type="button" className="secondary" disabled={selected.friend_status?.status !== "accepted"} onClick={loadConversation}>Send message</button>
+                <button type="button" className="secondary" onClick={() => { if(selected.friend_status?.status === "accepted") loadConversation(); else setNotice("You can message this student after they accept your friend request. Send a friend request to get started."); }}>Send message</button>
                 <button type="button" className="tertiary" onClick={() => setShowProfilePage(true)}>View profile</button>
               </div>
               {notice && <p className="student-profile-notice">{notice}</p>}
@@ -356,7 +356,7 @@ export default function DiscoverStudentsPage({ currentUserId }) {
                     ) : (
                       <span className="student-request-status">Friends</span>
                     )}
-                    <button type="button" className="secondary" disabled={selected.friend_status?.status !== "accepted"} onClick={loadConversation}>Send message</button>
+                    <button type="button" className="secondary" onClick={() => { if(selected.friend_status?.status === "accepted") loadConversation(); else setNotice("You can message this student after they accept your friend request. Send a friend request to get started."); }}>Send message</button>
                   </div>
                 </div>
                 {selected.bio?.trim() && <div className="student-profile-about"><h3>About</h3><p>{selected.bio}</p></div>}
