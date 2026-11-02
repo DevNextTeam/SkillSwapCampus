@@ -1,16 +1,11 @@
-const CACHE_NAME = "skillswap-campus-v3";
-
+const CACHE_NAME = "skillswap-campus-v4";
 const APP_FILES = ["/", "/index.html"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_FILES))
-      .catch((error) => {
-        // A failed precache must not prevent the browser from installing
-        // the worker; navigation can still be served from the network.
-        console.warn("SkillSwap precache skipped:", error);
-      })
+      .catch((error) => console.warn("SkillSwap app-shell precache skipped:", error))
   );
   self.skipWaiting();
 });
@@ -31,13 +26,10 @@ self.addEventListener("activate", (event) => {
 function isSafeToCache(request, response) {
   if (!response || response.status !== 200 || response.type !== "basic") return false;
   if (request.method !== "GET" || request.headers.has("range")) return false;
-
-  const headers = response.headers;
-  const cacheControl = (headers.get("Cache-Control") || "").toLowerCase();
+  const cacheControl = (response.headers.get("Cache-Control") || "").toLowerCase();
   if (cacheControl.includes("no-store") || cacheControl.includes("private")) return false;
-  if (headers.has("Content-Range")) return false;
-
-  const contentType = (headers.get("Content-Type") || "").toLowerCase();
+  if (response.headers.has("Content-Range")) return false;
+  const contentType = (response.headers.get("Content-Type") || "").toLowerCase();
   return !contentType.includes("application/json");
 }
 
@@ -45,42 +37,36 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Never cache API calls, authenticated content, cross-origin requests,
-  // non-GET requests, or byte-range media requests.
+  // Never intercept API requests, authenticated PHP endpoints, cross-origin
+  // resources, mutations, uploads, or partial media requests.
   if (
     url.origin !== self.location.origin ||
     request.method !== "GET" ||
     request.headers.has("range") ||
     url.pathname.includes("/backend/")
-  ) {
-    return;
-  }
+  ) return;
 
-  // Icons and other frequently updated branding assets stay network-fresh.
   if (url.pathname.startsWith("/icons/")) {
     event.respondWith(fetch(request));
     return;
   }
 
+  // Prefer current HTML after each release; fall back to the shell offline.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(async () =>
-        (await caches.match("/index.html")) || Response.error()
-      )
+      fetch(request).catch(async () => (await caches.match("/index.html")) || Response.error())
     );
     return;
   }
 
+  // Vite production assets are fingerprinted, making cache-first safe.
   event.respondWith(
     caches.match(request).then(async (cachedResponse) => {
       if (cachedResponse) return cachedResponse;
-
       const response = await fetch(request);
       if (isSafeToCache(request, response)) {
-        const responseCopy = response.clone();
-        event.waitUntil(
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseCopy))
-        );
+        const copy = response.clone();
+        event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)));
       }
       return response;
     })
