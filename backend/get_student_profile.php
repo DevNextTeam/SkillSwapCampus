@@ -9,11 +9,14 @@ try {
   $stmt=$pdo->prepare("SELECT id, full_name, university, course, year_level, bio, profile_photo FROM users WHERE id=? LIMIT 1");
   $stmt->execute([$id]); $student=$stmt->fetch(PDO::FETCH_ASSOC);
   if (!$student) { http_response_code(404); echo json_encode(["success"=>false,"message"=>"Student not found."]); exit; }
-  $stmt=$pdo->prepare("SELECT id, skill_name, description, skill_type, category FROM skills WHERE user_id=? ORDER BY created_at DESC");
-  $stmt->execute([$id]); $student["skills"]=$stmt->fetchAll(PDO::FETCH_ASSOC);
   $me=(int)$_SESSION["user_id"];
+  $stmt=$pdo->prepare("SELECT sk.id, sk.skill_name, sk.description, sk.skill_type, sk.category,
+      (SELECT s.id FROM sessions s WHERE s.skill_id=sk.id AND s.requester_id=? AND s.receiver_id=sk.user_id AND s.status IN ('pending','accepted') ORDER BY s.id DESC LIMIT 1) AS exchange_request_id,
+      (SELECT s.status FROM sessions s WHERE s.skill_id=sk.id AND s.requester_id=? AND s.receiver_id=sk.user_id AND s.status IN ('pending','accepted') ORDER BY s.id DESC LIMIT 1) AS exchange_request_status
+    FROM skills sk WHERE sk.user_id=? ORDER BY sk.created_at DESC");
+  $stmt->execute([$me,$me,$id]); $student["skills"]=$stmt->fetchAll(PDO::FETCH_ASSOC);
   $stmt=$pdo->prepare("SELECT id,status,sender_id,receiver_id FROM friend_requests WHERE (sender_id=? AND receiver_id=?) OR (sender_id=? AND receiver_id=?) ORDER BY id DESC LIMIT 1");
   $stmt->execute([$me,$id,$id,$me]); $friend=$stmt->fetch(PDO::FETCH_ASSOC);
   $student["friend_status"]=$friend ?: null;
   echo json_encode(["success"=>true,"student"=>$student]);
-} catch(PDOException $e) { http_response_code(500); echo json_encode(["success"=>false,"message"=>"Unable to load this profile."]); }
+} catch(PDOException $e) { error_log("Student profile lookup failed: ".$e->getMessage()); http_response_code(500); echo json_encode(["success"=>false,"message"=>"Unable to load this profile."]); }
