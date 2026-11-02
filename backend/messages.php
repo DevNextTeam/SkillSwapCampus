@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"]==="GET") {
   $q->execute([$me,$other,$other,$me]); $messages=array_reverse($q->fetchAll(PDO::FETCH_ASSOC));
   $q=$pdo->prepare("UPDATE messages SET read_at=NOW() WHERE sender_id=? AND receiver_id=? AND read_at IS NULL"); $q->execute([$other,$me]);
   echo json_encode(["success"=>true,"messages"=>$messages]);
- } catch(PDOException $e) { http_response_code(500); echo json_encode(["success"=>false,"message"=>"Unable to load messages."]); }
+ } catch(PDOException $e) { error_log("Message history query failed: ".$e->getMessage()); http_response_code(500); echo json_encode(["success"=>false,"message"=>"Unable to load messages. Please verify that the messaging database migrations have been applied."]); }
  exit;
 }
 if ($_SERVER["REQUEST_METHOD"]!=="POST") { http_response_code(405); echo json_encode(["success"=>false,"message"=>"Method not allowed."]); exit; }
