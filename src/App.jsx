@@ -199,8 +199,13 @@ function App() {
     const url = new URL(window.location.href);
     if (activePage === "Dashboard") url.searchParams.delete("page");
     else url.searchParams.set("page", activePage);
+    if (activePage === "My Exchanges" && ["pending", "completed"].includes(exchangeStatusFocus)) {
+      url.searchParams.set("exchangeStatus", exchangeStatusFocus);
+    } else {
+      url.searchParams.delete("exchangeStatus");
+    }
     window.history.replaceState({ ...window.history.state, skillswapPage: activePage }, "", url);
-  }, [activePage]);
+  }, [activePage, exchangeStatusFocus]);
   const [skillMode, setSkillMode] = useState("browse");
   const [exchangeStatusFocus, setExchangeStatusFocus] = useState(() => {
     const status = new URLSearchParams(window.location.search).get("exchangeStatus");
