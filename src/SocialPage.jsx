@@ -73,17 +73,30 @@ export default function SocialPage({ currentUserId }) {
     }catch(e){if(id===messageLoadId.current)setNotice(e.message||"Unable to load messages.");}
     finally{if(id===messageLoadId.current)setChatLoading(false);}
   }
+  function selectAttachment(event){
+    const file=event.target.files?.[0];
+    if(!file)return;
+    const allowedTypes=["image/jpeg","image/png","image/webp","image/gif","application/pdf","text/plain","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.ms-excel","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.ms-powerpoint","application/vnd.openxmlformats-officedocument.presentationml.presentation"];
+    if(file.size>10*1024*1024){setNotice("Files must be 10 MB or smaller.");event.target.value="";return;}
+    if(!allowedTypes.includes(file.type)){setNotice("Supported files: JPG, PNG, WebP, GIF, PDF, Word, Excel, PowerPoint, and text files.");event.target.value="";return;}
+    setAttachment(file);setNotice("");
+  }
   async function send(event){
     event.preventDefault();
     if(!active||sending||(!draft.trim()&&!attachment))return;
-    setSending(true);
+    setSending(true);setNotice("");
+    const text=draft.trim();
     try{
       if(attachment){
-        const form=new FormData();form.append("user_id",String(active.user_id));form.append("file",attachment);
+        const form=new FormData();
+        form.append("user_id",String(active.user_id));
+        form.append("file",attachment);
+        if(text)form.append("body",text);
         setUploading(true);
         await apiRequest("message_attachment.php",{method:"POST",body:form});
+      }else{
+        await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:text})});
       }
-      if(draft.trim())await apiRequest("messages.php",{method:"POST",body:JSON.stringify({user_id:active.user_id,body:draft.trim()})});
       setDraft("");setAttachment(null);
       if(fileInput.current)fileInput.current.value="";
       if(cameraInput.current)cameraInput.current.value="";
@@ -115,10 +128,10 @@ export default function SocialPage({ currentUserId }) {
         <div className="social-compose-row">
           <button type="button" className="social-attach-button" title="Attach a file" onClick={()=>fileInput.current?.click()}><Paperclip size={18}/></button>
           <button type="button" className="social-attach-button" title="Take or choose a photo" onClick={()=>cameraInput.current?.click()}><ImagePlus size={18}/></button>
-          <input ref={fileInput} type="file" hidden onChange={e=>setAttachment(e.target.files?.[0]||null)}/>
-          <input ref={cameraInput} type="file" hidden accept="image/*" capture="environment" onChange={e=>setAttachment(e.target.files?.[0]||null)}/>
+          <input ref={fileInput} type="file" hidden accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx" onChange={selectAttachment}/>
+          <input ref={cameraInput} type="file" hidden accept="image/jpeg,image/png,image/webp,image/gif" capture="environment" onChange={selectAttachment}/>
           <input value={draft} onChange={e=>setDraft(e.target.value)} maxLength={4000} placeholder={"Message "+active.full_name+"..."} />
-          <button disabled={(!draft.trim()&&!attachment)||sending}>{uploading?"…":<Send size={17}/>}</button>
+          <button type="submit" className="social-send-button" aria-label="Send message" title="Send message" disabled={(!draft.trim()&&!attachment)||sending}>{uploading?"…":<Send size={17}/>}</button>
         </div>
         <small className="social-compose-hint">Photos and documents up to 10 MB</small>
       </form></>:<div className="social-chat-placeholder"><div><MessageCircle size={34}/></div><h3>Your conversations</h3><p>Select a friend to view your chat history and send a private message.</p></div>}
