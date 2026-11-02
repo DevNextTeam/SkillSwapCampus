@@ -211,9 +211,20 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [showStartupSplash] = useState(() => { try { return window.sessionStorage.getItem("skillswap-session-active") !== "1"; } catch { return true; } });
 
+  // Load dashboard data only after authentication is ready. Re-run when the
+  // signed-in student changes so a fresh login never keeps the unauthenticated
+  // first-load result or another student's cached dashboard data.
   useEffect(() => {
+    if (!user) {
+      setDashboardSkills([]);
+      setDashboardRequestedSkills([]);
+      setDashboardLoading(false);
+      return undefined;
+    }
+
     let active = true;
     let requestInFlight = false;
+
     async function loadDashboardSkills() {
       if (requestInFlight) return;
       requestInFlight = true;
@@ -222,51 +233,102 @@ function App() {
         if (active) {
           const loadedSkills = result.skills || [];
           setDashboardSkills(loadedSkills);
-          setDashboardRequestedSkills(loadedSkills.filter((skill) => Number(skill.has_requested) === 1).map((skill) => Number(skill.id)));
+          setDashboardRequestedSkills(
+            loadedSkills
+              .filter((skill) => Number(skill.has_requested) === 1)
+              .map((skill) => Number(skill.id))
+          );
         }
       } catch (error) {
         console.error("Unable to load dashboard skills:", error);
-        if (active) setDashboardSkills([]);
+        if (active) {
+          setDashboardSkills([]);
+          setDashboardRequestedSkills([]);
+        }
       } finally {
         requestInFlight = false;
         if (active) setDashboardLoading(false);
       }
     }
+
     const refresh = () => {
       if (document.visibilityState === "visible") loadDashboardSkills();
     };
+
+    setDashboardLoading(true);
     loadDashboardSkills();
     const refreshTimer = window.setInterval(refresh, 15000);
     const clockTimer = window.setInterval(() => setDashboardClock(Date.now()), 30000);
     window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+
     return () => {
       active = false;
       window.clearInterval(refreshTimer);
       window.clearInterval(clockTimer);
       window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
     };
-  }, []);
+  }, [user?.id]);
 
+  // Keep exchange and friend totals tied to the active account and refresh
+  // them periodically so the dashboard reflects actions from either student.
   useEffect(() => {
+    if (!user) {
+      setDashboardExchanges([]);
+      setDashboardFriends([]);
+      setDashboardOverviewLoading(false);
+      return undefined;
+    }
+
     let active = true;
+    let requestInFlight = false;
+
     async function loadDashboardOverview() {
+      if (requestInFlight) return;
+      requestInFlight = true;
       setDashboardOverviewLoading(true);
+
       const [exchangeResult, socialResult] = await Promise.allSettled([
         apiRequest("get_exchanges.php"),
         apiRequest("social.php"),
       ]);
-      if (!active) return;
-      if (exchangeResult.status === "fulfilled") {
-        setDashboardExchanges(exchangeResult.value.exchanges || []);
+
+      if (active) {
+        setDashboardExchanges(
+          exchangeResult.status === "fulfilled"
+            ? exchangeResult.value.exchanges || []
+            : []
+        );
+        setDashboardFriends(
+          socialResult.status === "fulfilled"
+            ? socialResult.value.friends || []
+            : []
+        );
+        setDashboardOverviewLoading(false);
       }
-      if (socialResult.status === "fulfilled") {
-        setDashboardFriends(socialResult.value.friends || []);
-      }
-      setDashboardOverviewLoading(false);
+
+      requestInFlight = false;
     }
+
+    setDashboardExchanges([]);
+    setDashboardFriends([]);
     loadDashboardOverview();
-    return () => { active = false; };
-  }, []);
+
+    const refresh = () => {
+      if (document.visibilityState === "visible") loadDashboardOverview();
+    };
+    const refreshTimer = window.setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+
+    return () => {
+      active = false;
+      window.clearInterval(refreshTimer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [user?.id]);
 
   async function requestDashboardExchange(skill) {
     if (dashboardRequestingId !== null) return;
