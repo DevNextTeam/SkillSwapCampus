@@ -796,15 +796,7 @@ function App() {
                   </button>
                 </div>
                 {dashboardExchangeNotice && <div className={`dashboard-exchange-notice ${dashboardExchangeNoticeType}`} role="status">{dashboardExchangeNotice}</div>}
-                {dashboardLoading ? (
-                  <div className="skills-empty"><p>Loading recent skill posts...</p></div>
-                ) : dashboardSkills.length === 0 ? (
-                  <div className="skills-empty">
-                    <h3>No skill posts yet</h3>
-                    <p>New posts from students will appear here when they are shared.</p>
-                    <button className="primary-button" onClick={() => { setSkillMode("browse"); setActivePage("Explore Skills"); }}>Explore Skills</button>
-                  </div>
-                ) : (
+                {!dashboardLoading && dashboardSkills.length > 0 && (
                   <div className="database-skills-grid">
                     {dashboardSkills.slice(0, 6).map((skill) => (
                       <article className="database-skill-card" key={skill.id}>
