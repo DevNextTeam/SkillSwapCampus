@@ -131,3 +131,40 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+/* Match the Profile page avatar sizing exactly, scoped only to map markers. */
+.campus-map-marker-photo-wrap {
+  position: relative !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  padding: 3px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+}
+.campus-map-marker-photo-wrap .campus-map-marker-photo {
+  position: static !important;
+  inset: auto !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  flex: none !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  clip-path: none !important;
+}
