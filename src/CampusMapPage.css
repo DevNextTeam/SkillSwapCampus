@@ -64,3 +64,70 @@
 }
 
 .dashboard-skill-age{display:inline-flex;align-items:center;min-height:26px;padding:5px 9px;border-radius:20px;background:#f3f6f1;color:#778579;font-size:11px;font-weight:750;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+
+/* Map marker modes: photo-only circles, or name-only labels when no photo exists */
+.campus-map-icon-photo,
+.campus-map-icon-label {
+  border: 0 !important;
+  background: transparent !important;
+}
+.campus-map-icon-photo {
+  width: 48px !important;
+  height: 48px !important;
+}
+.campus-map-icon-label {
+  width: 140px !important;
+  height: 34px !important;
+}
+.campus-map-marker-photo-wrap {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  overflow: hidden;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #dcebd9;
+  box-shadow: 0 3px 12px #253c2d40;
+}
+.campus-map-marker-photo-wrap.is-me {
+  border-color: #4d9b63;
+  box-shadow: 0 0 0 4px #4d9b6330, 0 3px 12px #253c2d40;
+}
+.campus-map-marker-photo-wrap .campus-map-marker-photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+}
+.campus-map-marker-label {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 34px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid #d8e5d6;
+  border-radius: 17px;
+  background: #fff;
+  color: #3d5942;
+  box-shadow: 0 2px 9px #253c2d30;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
