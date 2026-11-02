@@ -70,6 +70,18 @@ npm.cmd run build
 
 GitHub Actions also validates frontend lint/build and PHP syntax on pushes and pull requests to `ui-redesign`.
 
+## Install SkillSwap Campus on a phone (PWA)
+
+The frontend includes a web app manifest, app icons, an install prompt for supported browsers, and a service worker. To install it as an app rather than a browser bookmark:
+
+1. Deploy the frontend on a domain with **HTTPS**. Service workers and installable PWAs require a secure context (localhost is the development exception).
+2. Open the HTTPS website on the phone. On Android, use Chrome and tap **Install** when the SkillSwap prompt appears, or use the browser menu and choose **Install app**. On iPhone/iPad, open the site in Safari, tap **Share**, then **Add to Home Screen**.
+3. Launch SkillSwap Campus from the new home-screen icon. The manifest requests standalone display, so it opens without the normal browser address bar.
+
+The service worker caches the app shell and safe static assets for a limited offline shell experience. It deliberately does not cache PHP API calls or authenticated JSON responses. Login, messaging, maps, uploads, and other live features still require the PHP API and database to be reachable.
+
+For phone testing on a real network, do not use `localhost` as the API host: on a phone, localhost means the phone itself. Configure `VITE_API_BASE_URL` to a reachable HTTPS API URL and configure the PHP allowed origins and secure session cookies for that deployment. Keep production credentials out of the frontend.
+
 ## Two-student workflow testing
 
 Use two separate browser sessions (for example, a normal window and a private window) so each student has an independent PHP login session. Follow the checklist in [docs/TWO_STUDENT_WORKFLOW_TEST.md](docs/TWO_STUDENT_WORKFLOW_TEST.md).
