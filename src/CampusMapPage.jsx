@@ -48,9 +48,9 @@ function getProfilePhotoUrl(photoPath) {
   const path = photoPath.trim();
   if (/^(https?:|data:)/i.test(path)) return path;
   const apiRoot = API_BASE.replace(/\/$/, "");
-  if (path.startsWith("/")) return window.location.origin + path;
-  if (path.startsWith("backend/")) return window.location.origin + "/skillswap-campus/" + path;
-  return apiRoot + "/" + path.replace(/^\.\//, "");
+  if (path.startsWith("/skillswap-campus/")) return window.location.origin + path;
+  if (path.startsWith("backend/")) return window.location.origin + "/" + path;
+  return apiRoot + "/" + path.replace(/^\/+|^\.\//g, "");
 }
 
 function attachMarkerPhotoFallback(marker) {
@@ -311,7 +311,7 @@ export default function CampusMapPage({ user, onNavigate }) {
       <section className="campus-map-layout">
         <div className="campus-map-canvas-wrap"><div ref={mapElement} className="campus-map-canvas" aria-label="Live map of students sharing their location" />{!mapReady && <div className="campus-map-loading">Loading interactive map…</div>}</div>
         <aside className="campus-map-roster"><div className="campus-map-roster-heading"><div><h3>Students nearby</h3><p>Live location sharing</p></div><Users size={19} /></div>
-          {loading ? <p className="campus-map-roster-empty">Loading student locations…</p> : visibleLocations.length === 0 ? <div className="campus-map-roster-empty"><MapPin size={22}/><strong>No students sharing yet</strong><span>Turn on your location to be the first on the map.</span></div> : <div className="campus-map-roster-list">{visibleLocations.map((student) => <button type="button" key={student.user_id} className="campus-map-roster-person" onClick={() => { mapRef.current?.setView([Number(student.latitude), Number(student.longitude)], 16); openStudentProfile(student); }}><span className="campus-map-roster-avatar">{student.profile_photo ? <img src={API_BASE + "/" + student.profile_photo} alt="" /> : initials(student.full_name)}</span><span><strong>{Number(student.user_id) === Number(user.id) ? "You" : student.full_name}</strong><small>{student.university || student.course || "Campus student"}</small></span><span className="campus-map-roster-distance">{myPosition ? distanceKm(myPosition, student).toFixed(1) + " km" : "View"}</span></button>)}</div>}
+          {loading ? <p className="campus-map-roster-empty">Loading student locations…</p> : visibleLocations.length === 0 ? <div className="campus-map-roster-empty"><MapPin size={22}/><strong>No students sharing yet</strong><span>Turn on your location to be the first on the map.</span></div> : <div className="campus-map-roster-list">{visibleLocations.map((student) => <button type="button" key={student.user_id} className="campus-map-roster-person" onClick={() => { mapRef.current?.setView([Number(student.latitude), Number(student.longitude)], 16); openStudentProfile(student); }}><span className="campus-map-roster-avatar"><span>{initials(student.full_name)}</span>{student.profile_photo && <img src={getProfilePhotoUrl(student.profile_photo)} alt="" onError={(event) => event.currentTarget.remove()} />}</span><span><strong>{Number(student.user_id) === Number(user.id) ? "You" : student.full_name}</strong><small>{student.university || student.course || "Campus student"}</small></span><span className="campus-map-roster-distance">{myPosition ? distanceKm(myPosition, student).toFixed(1) + " km" : "View"}</span></button>)}</div>}
           <div className="campus-map-privacy"><ShieldCheck size={17}/><span>Only signed-in students can see shared locations. Locations expire automatically after two minutes without an update.</span></div>
         </aside>
       </section>
