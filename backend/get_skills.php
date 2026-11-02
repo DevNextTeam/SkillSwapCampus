@@ -46,8 +46,7 @@ try {
                     AND sessions.requester_id = :current_user_id
                     AND sessions.status IN (
                         'pending',
-                        'accepted',
-                        'completed'
+                        'accepted'
                     )
                 )
                 THEN 1
