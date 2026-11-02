@@ -56,7 +56,7 @@ npm.cmd run dev
 
 Open the Vite URL shown in the terminal (normally `http://localhost:5173`).
 
-The frontend calls the PHP API at `http://localhost/skillswap-campus/backend`. If the frontend is accessed from another development device or origin, configure `APP_ALLOWED_ORIGINS` in PHP with the exact comma-separated origins that should be trusted. Do not use a wildcard when credentials are enabled.
+The frontend calls the PHP API at `http://localhost/skillswap-campus/backend` by default. To use a different API host or deployment path, copy `.env.local.example` to `.env.local`, set `VITE_API_BASE_URL` to the full PHP API base URL, and restart Vite. If the frontend is accessed from another development device or origin, configure `APP_ALLOWED_ORIGINS` in PHP with the exact comma-separated origins that should be trusted. Do not use a wildcard when credentials are enabled.
 
 ### Verify changes
 
