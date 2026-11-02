@@ -5,5 +5,3 @@ Options -Indexes -ExecCGI
     Require all denied
 </FilesMatch>
 
-# Prevent content sniffing when uploaded files are served.
-Header always set X-Content-Type-Options "nosniff"
