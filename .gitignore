@@ -37,3 +37,4 @@ backend/uploads/messages/*
 !backend/uploads/profiles/.htaccess
 !backend/uploads/messages/.htaccess
 !backend/uploads/.htaccess
+/backend/production-config.php
