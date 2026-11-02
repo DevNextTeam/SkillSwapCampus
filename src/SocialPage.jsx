@@ -96,7 +96,7 @@ export default function SocialPage({ currentUserId }) {
     if(!message.attachment_name)return null;
     const url=API_BASE+"/message_attachment.php?id="+encodeURIComponent(message.id);
     return <a className="social-attachment" href={url} target="_blank" rel="noreferrer">
-      {String(message.attachment_mime||"").startsWith("image/")?<img src={url} alt={message.attachment_name} loading="lazy"/>:<span className="social-file-icon"><FileText size={22}/></span>}
+      {String(message.attachment_mime||"").startsWith("image/")?<img src={url} alt={message.attachment_name} loading="lazy" crossOrigin="use-credentials"/>:<span className="social-file-icon"><FileText size={22}/></span>}
       <span><strong>{message.attachment_name}</strong><small>{Math.max(1,Math.round(Number(message.attachment_size||0)/1024))} KB · Open attachment</small></span><Download size={16}/>
     </a>;
   }
