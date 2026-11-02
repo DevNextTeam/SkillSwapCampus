@@ -3,3 +3,38 @@
 .campus-map-precision{display:flex;align-items:center;gap:7px;color:#718074;font-size:10px;font-weight:800}.campus-map-precision select,.campus-map-discovery select{min-height:38px;padding:8px 10px;border:1px solid #dfe8dd;border-radius:9px;background:#fff;color:#526657;font-size:11px}.campus-map-discovery{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 14px;border:1px solid #e4ebe2;border-radius:13px;background:#fff}.campus-map-search{display:flex;align-items:center;gap:8px;flex:1;min-width:220px;padding:0 10px;border:1px solid #dfe8dd;border-radius:9px;color:#78907b}.campus-map-search input{width:100%;min-height:38px;border:0;outline:0;background:transparent;color:#405346;font-size:12px}.campus-map-discovery>span{margin-left:auto;color:#829086;font-size:11px}.campus-map-roster-distance{color:#68846d;font-size:10px;font-weight:800;white-space:nowrap}.campus-map-modal-backdrop{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:18px;background:#1d2b2180;backdrop-filter:blur(3px)}.campus-map-profile-modal{position:relative;width:min(100%,480px);max-height:min(80vh,680px);overflow:auto;padding:25px;border:1px solid #e0e9de;border-radius:18px;background:#fff;box-shadow:0 24px 80px #17251d40}.campus-map-modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;display:grid;place-items:center;border:1px solid #e5ece3;border-radius:10px;background:#fff;color:#687c6b;cursor:pointer}.campus-map-profile-head{display:flex;align-items:center;gap:14px;padding-right:30px}.campus-map-profile-avatar{width:66px;height:66px;flex:none;display:grid;place-items:center;overflow:hidden;border-radius:50%;background:#e3eee0;color:#4d7054;font-size:19px;font-weight:900}.campus-map-profile-avatar img{width:100%;height:100%;object-fit:cover}.campus-map-profile-head h3{margin:0 0 5px;color:#34483a;font-size:18px}.campus-map-profile-head p{margin:0 0 4px;color:#627a66;font-size:12px}.campus-map-profile-head small{color:#89948b;font-size:11px}.campus-map-profile-bio{margin:18px 0;padding:13px;border-radius:10px;background:#f6f8f5;color:#66766a;font-size:12px;line-height:1.65}.campus-map-profile-skills{margin-top:20px}.campus-map-profile-skills h4{display:flex;align-items:center;gap:7px;margin:0 0 11px;color:#415b47;font-size:13px}.campus-map-profile-skills>div{display:flex;gap:7px;flex-wrap:wrap}.campus-map-profile-skills>div span{padding:7px 9px;border:1px solid #e0eade;border-radius:8px;background:#f5f8f3;color:#56705b;font-size:10px}.campus-map-profile-skills>p{color:#89948b;font-size:12px}.campus-map-profile-actions{display:flex;gap:9px;margin-top:22px}.campus-map-profile-primary,.campus-map-profile-secondary{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer}.campus-map-profile-primary{border:1px solid #52775b;background:#52775b;color:#fff}.campus-map-profile-primary:disabled{opacity:.65;cursor:default}.campus-map-profile-secondary{border:1px solid #dfe8dd;background:#fff;color:#55715b}.campus-map-profile-loading{padding:40px;text-align:center;color:#7b897e;font-size:13px}@media(max-width:600px){.campus-map-precision{width:100%;justify-content:space-between}.campus-map-precision select{flex:1}.campus-map-discovery select{flex:1;min-width:130px}.campus-map-discovery>span{width:100%;margin:0}.campus-map-profile-actions>*{flex:1}}
 
 .campus-map-profile-secondary:disabled{opacity:.55;cursor:default;background:#f5f7f4;color:#89948b}.campus-map-profile-primary:focus-visible,.campus-map-profile-secondary:focus-visible{outline:3px solid #91b99a;outline-offset:2px}
+
+/* Mobile-first campus map layout: prevent page-wide horizontal overflow */
+.campus-map-page,.campus-map-layout,.campus-map-canvas-wrap,.campus-map-roster{min-width:0;max-width:100%}
+.campus-map-discovery{min-width:0}.campus-map-search{min-width:0;flex:1 1 100%}.campus-map-discovery select{max-width:100%;min-width:0}
+.campus-map-controls{min-width:0}.campus-map-actions{flex-wrap:wrap;min-width:0}.campus-map-precision{flex-wrap:wrap}
+@media(max-width:700px){
+ .campus-map-page{gap:12px;width:100%;overflow:hidden}
+ .campus-map-intro{padding:15px;gap:11px;border-radius:13px}
+ .campus-map-intro-icon{width:38px;height:38px;border-radius:11px}
+ .campus-map-intro h2{font-size:19px}
+ .campus-map-intro p{font-size:12px;line-height:1.55}
+ .campus-map-controls{padding:13px;gap:12px}
+ .campus-map-status{min-width:0}
+ .campus-map-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+ .campus-map-share,.campus-map-stop{min-width:0;width:100%;padding:9px 7px;font-size:11px}
+ .campus-map-secondary{width:100%}
+ .campus-map-precision{width:100%;justify-content:space-between}
+ .campus-map-precision select{flex:1;min-width:0}
+ .campus-map-discovery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}
+ .campus-map-search{grid-column:1/-1;width:100%;min-width:0}
+ .campus-map-discovery select{width:100%;font-size:11px}
+ .campus-map-discovery>span{grid-column:1/-1;margin:0}
+ .campus-map-canvas-wrap{height:clamp(300px,55vh,440px);border-radius:13px}
+ .campus-map-roster{max-height:none}
+ .campus-map-roster-list{max-height:260px}
+ .campus-map-modal-backdrop{padding:10px}
+ .campus-map-profile-modal{width:100%;max-height:88dvh;padding:19px 15px;border-radius:15px}
+ .campus-map-profile-actions{display:grid;grid-template-columns:1fr 1fr}
+}
+@media(max-width:380px){
+ .campus-map-intro{display:block}
+ .campus-map-intro-icon{margin-bottom:10px}
+ .campus-map-actions{grid-template-columns:1fr}
+ .campus-map-canvas-wrap{height:300px}
+}
